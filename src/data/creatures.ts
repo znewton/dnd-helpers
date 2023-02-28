@@ -1,5 +1,5 @@
 import {
-  Entry, FiveEToolsBasePath, getJsonData, IImage,
+  Entry, FiveEToolsBasePath, getJsonData, IAbility, IImage, ISkill,
 } from './common';
 import config from '../config';
 
@@ -45,7 +45,7 @@ export interface ICreatureFluff {
   images?: IImage[];
   _copy?: Pick<ICreatureFluff, 'name' | 'source'>
 }
-export interface ICreature {
+export interface ICreature extends IAbility<number> {
   name: string;
   source: string;
   page: number;
@@ -55,40 +55,8 @@ export interface ICreature {
   ac: (number | ICreatureDetailedAC)[];
   hp: ICreatureHP;
   speed: ICreatureSpeed;
-  str: number;
-  dex: number;
-  con: number;
-  int: number;
-  wis: number;
-  cha: number;
-  save?: Partial<{
-    str: string;
-    dex: string;
-    con: string;
-    int: string;
-    wis: string;
-    cha: string;
-  }> | undefined;
-  skill?: Partial<{
-    acrobatics: string;
-    'animal handling': string;
-    arcana: string;
-    athletics: string;
-    deception: string;
-    history: string;
-    insight: string;
-    intimidation: string;
-    investigation: string;
-    medicine: string;
-    nature: string;
-    perception: string;
-    performance: string;
-    persuasion: string;
-    religion: string;
-    'sleight of hand': string;
-    stealth: string;
-    survival: string;
-  }> | undefined;
+  save?: Partial<IAbility<string>> | undefined;
+  skill?: Partial<ISkill<string>> | undefined;
   senses?: string[] | undefined;
   /**
      * Passive Perception

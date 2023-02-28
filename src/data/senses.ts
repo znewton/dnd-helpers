@@ -22,5 +22,5 @@ export async function listSenses(): Promise<ISense[]> {
     { sense: [] },
   );
   return sensesJson.sense
-    .filter((sense) => ownedSourceBooks.includes(sense.source));
+    .filter((sense) => ownedSourceBooks.includes(sense.source.toLowerCase()));
 }

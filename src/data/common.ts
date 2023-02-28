@@ -36,6 +36,35 @@ export interface IImage {
   }
 }
 
+export interface IAbility<T> {
+  str: T;
+  dex: T;
+  con: T;
+  int: T;
+  wis: T;
+  cha: T;
+}
+export interface ISkill<T> {
+  acrobatics: T;
+  'animal handling': T;
+  arcana: T;
+  athletics: T;
+  deception: T;
+  history: T;
+  insight: T;
+  intimidation: T;
+  investigation: T;
+  medicine: T;
+  nature: T;
+  perception: T;
+  performance: T;
+  persuasion: T;
+  religion: T;
+  'sleight of hand': T;
+  stealth: T;
+  survival: T;
+}
+
 export async function getJsonData<T>(
   filename: string,
   baseUrl: string,

@@ -28,7 +28,7 @@ export async function listConditions(): Promise<ICondition[]> {
     { condition: [], disease: [] },
   );
   return conditionsDiseasesJson.condition
-    .filter((condition) => ownedSourceBooks.includes(condition.source));
+    .filter((condition) => ownedSourceBooks.includes(condition.source.toLowerCase()));
 }
 export async function listDiseases(): Promise<IDisease[]> {
   const { ownedSourceBooks } = config;
@@ -38,5 +38,5 @@ export async function listDiseases(): Promise<IDisease[]> {
     { condition: [], disease: [] },
   );
   return conditionsDiseasesJson.disease
-    .filter((disease) => ownedSourceBooks.includes(disease.source));
+    .filter((disease) => ownedSourceBooks.includes(disease.source.toLowerCase()));
 }

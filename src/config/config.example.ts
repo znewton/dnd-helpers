@@ -13,6 +13,8 @@ const config: IConfig = {
     conditions: 'Mechanics/Conditions',
     actions: 'Mechanics/Actions',
     skills: 'Mechanics/Skills',
+    races: 'Reference/Races',
+    classes: 'Reference/Classes',
   },
 };
 

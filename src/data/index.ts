@@ -1,4 +1,9 @@
 export {
+  IActionUseTime,
+  IAction,
+  listActions,
+} from './actions';
+export {
   ISourceBook,
   listBooks,
 } from './books';
@@ -22,6 +27,19 @@ export {
 export {
   listItems,
 } from './items';
+export {
+  IRace,
+  IRaceFluff,
+  listRaces,
+} from './races';
+export {
+  ISense,
+  listSenses,
+} from './senses';
+export {
+  ISkill,
+  listSkills,
+} from './skills';
 export {
   SpellSchool,
   SpellComponent,

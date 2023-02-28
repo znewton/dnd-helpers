@@ -24,5 +24,7 @@ export interface IConfig {
     conditions: string;
     actions: string;
     skills: string;
+    races: string;
+    classes: string;
   };
 }
