@@ -1,5 +1,6 @@
-import Axios, { AxiosError } from 'axios';
-import { Entry, FiveEToolsBasePath, FiveEToolsCache } from './common';
+import {
+  Entry, FiveEToolsBasePath, getJsonData, IImage,
+} from './common';
 import config from '../config';
 
 export enum CreatureSize {
@@ -17,13 +18,6 @@ export enum CreatureAlignment {
   L = 'Lawful',
   C = 'Chaotic',
   U = 'Unaligned',
-}
-export interface IImage {
-  type: string;
-  href: {
-    type: string;
-    path: string;
-  }
 }
 export interface ICreatureDetailedAC {
   ac: number;
@@ -106,48 +100,32 @@ export interface ICreature {
   environment: string[] | undefined;
   fluff?: ICreatureFluff | undefined;
 }
+
+type MonsterJson = { monster: Omit<ICreature, 'fluff'>[] };
+type MonsterFluffJson = { monsterFluff: ICreatureFluff[] };
 const creaturesBaseUrl = `${FiveEToolsBasePath}/data/bestiary`;
 export async function listCreatures(
   options: { includeFluff: boolean } = { includeFluff: false },
 ): Promise<ICreature[]> {
   const { ownedSourceBooks } = config;
   const bestiaryFiles = ownedSourceBooks.map((alias) => `bestiary-${alias}.json`);
-  const bestiaryReadPs: Promise<{ monster: ICreature[] }>[] = [];
+  const bestiaryReadPs: Promise<MonsterJson>[] = [];
   [...bestiaryFiles].forEach((fileName) => {
-    bestiaryReadPs.push((async () => {
-      const cachedBestiaryJson: { monster: ICreature[] } | undefined = await FiveEToolsCache.get(fileName);
-      const bestiaryJson: { monster: ICreature[] } = cachedBestiaryJson
-          ?? (await Axios.get(`${creaturesBaseUrl}/${fileName}`).catch((err: AxiosError) => {
-            if (err.status === 404) {
-              return { data: undefined };
-            }
-            throw err;
-          })).data ?? { monster: [] };
-      if (!cachedBestiaryJson) {
-        FiveEToolsCache.set(fileName, bestiaryJson).catch(process.stderr.write);
-      }
-      return bestiaryJson;
-    })());
+    bestiaryReadPs.push(getJsonData<MonsterJson>(
+      fileName,
+      creaturesBaseUrl,
+      { monster: [] },
+    ));
   });
-  const fluffBestiaryReadPs: Promise<{ monsterFluff: ICreatureFluff[] }>[] = [];
+  const fluffBestiaryReadPs: Promise<MonsterFluffJson>[] = [];
   if (options.includeFluff) {
     const fluffBestiaryFiles = ownedSourceBooks.map((alias) => `fluff-bestiary-${alias}.json`);
     [...fluffBestiaryFiles].forEach((fileName) => {
-      fluffBestiaryReadPs.push((async () => {
-        const cachedFluffBestiaryJson: { monsterFluff: ICreatureFluff[] } | undefined = await FiveEToolsCache
-          .get(fileName);
-        const fluffBestiaryJson: { monsterFluff: ICreatureFluff[] } = cachedFluffBestiaryJson
-          ?? (await Axios.get(`${creaturesBaseUrl}/${fileName}`).catch((err: AxiosError) => {
-            if (err.status === 404) {
-              return { data: undefined };
-            }
-            throw err;
-          })).data ?? { monsterFluff: [] };
-        if (!cachedFluffBestiaryJson) {
-          FiveEToolsCache.set(fileName, fluffBestiaryJson).catch(process.stderr.write);
-        }
-        return fluffBestiaryJson;
-      })());
+      fluffBestiaryReadPs.push(getJsonData<MonsterFluffJson>(
+        fileName,
+        creaturesBaseUrl,
+        { monsterFluff: [] },
+      ));
     });
   }
   const bestiaryJsons = await Promise.all(bestiaryReadPs);

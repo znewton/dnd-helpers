@@ -1,4 +1,6 @@
-import type { IConfig } from '../config';
+import path from 'path';
+import os from 'os';
+import type { IConfig } from './definitions';
 
 const config: IConfig = {
   ownedSourceBooks: [
@@ -10,5 +12,15 @@ const config: IConfig = {
     'tce',
     'mpmm',
   ],
+  outputRootDir: path.join(os.homedir(), '/Documents/DND/Rules'),
+  outputDirs: {
+    spells: 'Spells',
+    items: 'Items',
+    magicItems: 'MagicItems',
+    creatures: 'Bestiary',
+    conditions: 'Mechanics/Conditions',
+    actions: 'Mechanics/Actions',
+    skills: 'Mechanics/Skills',
+  },
 };
 export default config;
