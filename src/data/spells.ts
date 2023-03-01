@@ -33,7 +33,7 @@ export interface ISpellRange {
 export interface ISpellComponents {
   [SpellComponent.s]?: boolean | undefined;
   [SpellComponent.v]?: boolean | undefined;
-  [SpellComponent.m]?: string | undefined;
+  [SpellComponent.m]?: string | { text: string; cost: number; consume?: boolean | undefined; } | undefined;
 }
 export interface ISpellDuration {
   type: string;
@@ -46,7 +46,7 @@ export interface ISpellDuration {
 export interface ISpellFluff {
   name: string;
   source: string;
-  images?: IImage[];
+  images?: IImage[] | undefined;
 }
 export interface ISpell {
   name: string;
@@ -59,6 +59,8 @@ export interface ISpell {
   components: ISpellComponents;
   duration: ISpellDuration[];
   entries: Entry[];
+  entriesHigherLevel?: Entry[] | undefined;
+  meta?: { ritual: boolean; } | undefined;
   fluff?: ISpellFluff | undefined;
 }
 type SpellJson = { spell: Omit<ISpell, 'fluff'>[] };

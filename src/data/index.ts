@@ -8,6 +8,17 @@ export {
   listBooks,
 } from './books';
 export {
+  Entry,
+  IEntry,
+  TableEntryCell,
+  ITableEntry,
+  IListEntry,
+  IWrapperEntry,
+  IImage,
+  IAbility,
+  ISkill,
+} from './common';
+export {
   ICondition,
   IDisease,
   listConditions,
@@ -37,8 +48,8 @@ export {
   listSenses,
 } from './senses';
 export {
-  ISkill,
-  listSkills,
+  ISkillDescription,
+  listSkillDescriptions,
 } from './skills';
 export {
   SpellSchool,

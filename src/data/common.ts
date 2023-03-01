@@ -11,12 +11,20 @@ export interface IEntry {
   name?: string;
   entries: Entry[];
 }
+export type TableEntryCell = string | {
+  entry?: Entry | undefined;
+  roll?: {
+    exact?: number | undefined;
+    min?: number | undefined;
+    max?: number | undefined;
+  } | undefined;
+};
 export interface ITableEntry {
   type: 'table';
   caption: string;
   colLabels: string[];
   colStyles: string[];
-  rows: string[][];
+  rows: (string | TableEntryCell)[][];
 }
 export interface IListEntry {
   type: 'list';

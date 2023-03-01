@@ -20,6 +20,7 @@ export interface IRace {
   ability: Partial<IAbility<number>>[];
   skillProficiencies: Partial<ISkill<boolean>>[];
   languageProficiencies: { [language: string]: boolean | number | undefined }[];
+  // TODO: Legacy races. "reprintedAs" on some of them.
   fluff?: IRaceFluff | undefined;
 }
 
