@@ -2,7 +2,10 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { listBooks } from './data';
-import { generateActionsFiles } from './generators';
+import {
+  generateActionsFiles, generateConditionsFiles, generateDiseasesFiles, generateSensesFiles, generateSkillsFiles,
+} from './generators';
+import { toTitleCase } from './utils';
 
 yargs(hideBin(process.argv))
   .command(
@@ -16,20 +19,35 @@ yargs(hideBin(process.argv))
         'spells',
         'actions',
         'conditions',
+        'diseases',
         'races',
         'senses',
         'skills',
       ],
     }),
     (argv) => {
+      let generator: () => Promise<void>;
       switch (argv.type) {
         case 'actions':
-          console.log('Writing Actions');
-          generateActionsFiles().catch(console.error);
+          generator = generateActionsFiles;
+          break;
+        case 'conditions':
+          generator = generateConditionsFiles;
+          break;
+        case 'diseases':
+          generator = generateDiseasesFiles;
+          break;
+        case 'skills':
+          generator = generateSkillsFiles;
+          break;
+        case 'senses':
+          generator = generateSensesFiles;
           break;
         default:
           throw new Error('Not Implemented');
       }
+      console.log(`Generating ${toTitleCase(argv.type)}`);
+      generator().catch(console.error);
     },
   )
   .command(

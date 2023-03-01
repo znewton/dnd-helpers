@@ -1,17 +1,14 @@
 import config from '../config';
 import {
+  CombatTime,
   Entry, FiveEToolsBasePath, getJsonData,
 } from './common';
 
-export interface IActionUseTime {
-  number: number;
-  unit: string;
-}
 export interface IAction {
   name: string;
   source: string;
   page: number;
-  time: (string | IActionUseTime)[];
+  time?: CombatTime[] | undefined;
   entries: Entry[];
   seeAlsoAction: string[];
 }

@@ -1,8 +1,27 @@
-import type { Entry, IEntry, TableEntryCell } from '../data/common';
+import type {
+  CombatTime, Entry, IEntry, TableEntryCell,
+} from '../data/common';
 import { obsidianLink } from './filenames';
 
 export function toTitleCase(str: string): string {
   return str.split(' ').map((chunk) => `${chunk[0]?.toUpperCase()}${chunk.substring(1).toLowerCase()}`).join(' ');
+}
+
+export function combatTimeToString(combatTimes: CombatTime[]): string {
+  const times: string[] = [];
+
+  combatTimes.forEach((combatTime): void => {
+    if (typeof combatTime === 'string') {
+      times.push(combatTime);
+      return;
+    }
+    const { number, unit } = combatTime;
+    const isPlural = number > 1;
+    const unitText = toTitleCase(`${(unit === 'bonus' ? 'bonus action' : unit)}${isPlural ? 's' : ''}`);
+    times.push(`${number} ${unitText}`);
+  });
+
+  return times.join(' or ');
 }
 
 /**
@@ -22,9 +41,25 @@ export function reformat5eToolsLinks(text: string) {
     .replace(/\{@b ([A-Za-z0-9 ]+)\}/g, '**$1**')
     .replace(/\{@i ([A-Za-z0-9 ]+)\}/g, '_$1_')
     .replace(/\{@action ([A-Za-z0-9 ]+)\}/g, (_match, p1) => obsidianLink(p1))
+    .replace(/^\{@note (.+)\}$/g, (_match, p1): string => `> [!note] Note\n> ${reformat5eToolsLinks(p1)}`)
     .replace(/([A-Z][a-z]+) \(\{@skill ([0-9a-zA-Z ]+)\}\)/g, (_match, p1, p2) => obsidianLink(p2, `${toTitleCase(p1)} (${toTitleCase(p2)})`))
     // TODO: Still link to Abilities descriptions?
     .replace(/DC ([0-9]+) ([A-Z][a-z]+) saving/g, 'DC $1 $2 saving');
+}
+
+export function buildMarkdownPropertyTable(...rows: [string, string][]) {
+  const table = [
+    '| | |',
+    '| ---: | :--- |',
+  ];
+
+  rows.forEach(([key, value]) => {
+    if (key && value) {
+      table.push(`| **${key}:** | ${value} |`);
+    }
+  });
+
+  return table.join('\n');
 }
 
 function entryToMarkdown(entry: Entry): string | undefined {
@@ -52,9 +87,27 @@ function entryToMarkdown(entry: Entry): string | undefined {
   }
 
   /**
+   * Link Entry
+   */
+  if (entry.type === 'link') {
+    if (entry.href.type !== 'internal') {
+      throw new Error(`Unexpected href type encountered: ${entry.href.type}`);
+    }
+    const url = new URL(entry.href.path, 'https://5e.tools');
+    if (entry.href.hash) {
+      if (entry.href.hashPreEncoded) {
+        url.hash = entry.href.hash;
+      } else {
+        url.hash = encodeURIComponent(entry.href.hash);
+      }
+    }
+    return `[${entry.text}](${url.toString()})`;
+  }
+
+  /**
    * Sub Entries
    */
-  if (entry.type === 'entries' || entry.type === 'inset') {
+  if (entry.type === 'entries' || entry.type === 'inset' || entry.type === 'inline') {
     const markdownEntries: string[] = [];
     if (entry.name) {
       markdownEntries.push(`**_${entry.name}._**`);
@@ -69,6 +122,8 @@ function entryToMarkdown(entry: Entry): string | undefined {
 
     if (entry.type === 'inset') {
       return ['>', markdownEntries].join(' ').replaceAll('\n', '\n> ');
+    } if (entry.type === 'inline') {
+      markdownEntries.join(' ').replaceAll('\n', ' ');
     }
 
     return markdownEntries.join(' ');

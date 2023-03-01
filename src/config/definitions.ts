@@ -22,8 +22,10 @@ export interface IConfig {
     magicItems: string;
     creatures: string;
     conditions: string;
+    diseases: string;
     actions: string;
     skills: string;
+    senses: string;
     races: string;
     classes: string;
   };

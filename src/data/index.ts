@@ -1,5 +1,4 @@
 export {
-  IActionUseTime,
   IAction,
   listActions,
 } from './actions';
@@ -15,6 +14,8 @@ export {
   IListEntry,
   IWrapperEntry,
   IImage,
+  ICombatTime,
+  CombatTime,
   IAbility,
   ISkill,
 } from './common';
@@ -54,7 +55,6 @@ export {
 export {
   SpellSchool,
   SpellComponent,
-  ISpellCastingTime,
   ISpellRange,
   ISpellComponents,
   ISpellDuration,

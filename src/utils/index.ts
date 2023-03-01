@@ -6,5 +6,7 @@ export {
 export {
   toTitleCase,
   reformat5eToolsLinks,
+  combatTimeToString,
+  buildMarkdownPropertyTable,
   entriesToMarkdown,
 } from './formatting';

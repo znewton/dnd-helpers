@@ -1,5 +1,6 @@
 import config from '../config';
 import {
+  CombatTime,
   Entry, FiveEToolsBasePath, getJsonData, IImage,
 } from './common';
 
@@ -18,10 +19,6 @@ export enum SpellComponent {
   v = 'Verbal',
   s = 'Somatic',
   m = 'Material',
-}
-export interface ISpellCastingTime {
-  number: number;
-  unit: string;
 }
 export interface ISpellRange {
   type: string;
@@ -54,7 +51,7 @@ export interface ISpell {
   page: number;
   level: number;
   school: SpellSchool;
-  time: ISpellCastingTime[];
+  time: CombatTime[];
   range: ISpellRange;
   components: ISpellComponents;
   duration: ISpellDuration[];

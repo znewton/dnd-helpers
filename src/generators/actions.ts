@@ -3,19 +3,24 @@ import { promises as fs } from 'fs';
 import config from '../config';
 import { IAction, listActions } from '../data';
 import {
-  entriesToMarkdown, normalizeFilename, toTitleCase, obsidianLink,
+  entriesToMarkdown, normalizeFilename, toTitleCase, obsidianLink, buildMarkdownPropertyTable, combatTimeToString,
 } from '../utils';
 
 function actionToMarkdown(action: IAction): string {
   return `---
 alias: ${toTitleCase(action.name)}
-tags: 5eTools
+tags: 5eTools, action
 ---
 
 # ${toTitleCase(action.name)}
 
+${buildMarkdownPropertyTable(
+    ['Time', action.time ? combatTimeToString(action.time) : '-'],
+  )}
+
 ${entriesToMarkdown(action.entries)}
 ${action.seeAlsoAction ? `${action.seeAlsoAction.map((seeAlsoAction) => obsidianLink(seeAlsoAction)).join(', ')}` : ''}
+
 ---
 
 **Source:** ${action.source}, page ${action.page}

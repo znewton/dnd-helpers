@@ -5,11 +5,22 @@ import { JsonCache } from '../utils';
 export const FiveEToolsBasePath = 'https://raw.githubusercontent.com/5etools-mirror-1/5etools-mirror-1.github.io/master';
 export const FiveEToolsCache = new JsonCache(path.join(__dirname, '../cache'));
 
-export type Entry = IEntry | ITableEntry | IListEntry | IWrapperEntry | string;
+export type Entry = IEntry | ITableEntry | IListEntry | IWrapperEntry | ILinkEntry | string;
 export interface IEntry {
-  type: 'entries' | 'inset';
+  type: 'entries' | 'inset' | 'inline';
   name?: string;
   entries: Entry[];
+}
+export interface IHref {
+  type: 'internal' | string;
+  path: string;
+  hash?: string | undefined;
+  hashPreEncoded?: boolean | undefined;
+}
+export interface ILinkEntry {
+  type: 'link';
+  href: IHref;
+  text: string;
 }
 export type TableEntryCell = string | {
   entry?: Entry | undefined;
@@ -43,6 +54,12 @@ export interface IImage {
     path: string;
   }
 }
+
+export interface ICombatTime {
+  number: number;
+  unit: 'action' | 'bonus' | 'reaction';
+}
+export type CombatTime = 'Varies' | ICombatTime;
 
 export interface IAbility<T> {
   str: T;
