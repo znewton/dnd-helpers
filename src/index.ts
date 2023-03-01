@@ -2,17 +2,34 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { listBooks } from './data';
+import { generateActionsFiles } from './generators';
 
 yargs(hideBin(process.argv))
   .command(
     'gen <type>',
-    'Generate helper files for type (items, spells, or creatures)',
+    'Generate helper files for type',
     (y) => y.positional('type', {
       demandOption: true,
-      choices: ['items', 'creatures', 'spells'],
+      choices: [
+        'items',
+        'creatures',
+        'spells',
+        'actions',
+        'conditions',
+        'races',
+        'senses',
+        'skills',
+      ],
     }),
     (argv) => {
-      process.stdout.write(argv.type);
+      switch (argv.type) {
+        case 'actions':
+          console.log('Writing Actions');
+          generateActionsFiles().catch(console.error);
+          break;
+        default:
+          throw new Error('Not Implemented');
+      }
     },
   )
   .command(
@@ -29,4 +46,5 @@ yargs(hideBin(process.argv))
         });
     },
   )
+  .help()
   .parse();

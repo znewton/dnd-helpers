@@ -1,0 +1,1 @@
+export { generateActionsFiles } from './actions';

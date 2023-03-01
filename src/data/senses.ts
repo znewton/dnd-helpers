@@ -7,7 +7,7 @@ export interface ISense {
   name: string;
   source: string;
   page: number;
-  entries: Entry;
+  entries: Entry[];
 }
 
 type SensesJson = { sense: ISense[]; };

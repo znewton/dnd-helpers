@@ -1,5 +1,5 @@
 import path from 'path';
-import os from 'os';
+// import os from 'os';
 import type { IConfig } from './definitions';
 
 const config: IConfig = {
@@ -12,7 +12,8 @@ const config: IConfig = {
     'tce',
     'mpmm',
   ],
-  outputRootDir: path.join(os.homedir(), '/Documents/DND/Rules'),
+  // outputRootDir: path.join(os.homedir(), '/Documents/DND/Rules'),
+  outputRootDir: path.join(__dirname, '../../test'),
   outputDirs: {
     spells: 'Spells',
     items: 'Items',

@@ -7,7 +7,7 @@ export interface ISkillDescription {
   name: string;
   source: string;
   page: number;
-  entries: Entry;
+  entries: Entry[];
 }
 
 type SkillsJson = { skill: ISkillDescription[]; };

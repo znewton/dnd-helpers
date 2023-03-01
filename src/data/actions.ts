@@ -12,7 +12,7 @@ export interface IAction {
   source: string;
   page: number;
   time: (string | IActionUseTime)[];
-  entries: Entry;
+  entries: Entry[];
   seeAlsoAction: string[];
 }
 

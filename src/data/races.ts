@@ -7,14 +7,14 @@ import type { CreatureSize, ICreatureSpeed } from './creatures';
 export interface IRaceFluff {
   name: string;
   source: string;
-  entries: Entry;
+  entries: Entry[];
   images?: IImage[] | undefined;
 }
 export interface IRace {
   name: string;
   source: string;
   page: number;
-  entries: Entry;
+  entries: Entry[];
   size: CreatureSize[];
   speed: ICreatureSpeed;
   ability: Partial<IAbility<number>>[];

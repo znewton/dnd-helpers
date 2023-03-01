@@ -21,6 +21,7 @@ export function reformat5eToolsLinks(text: string) {
     .replace(/\{@creature ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/g, (_match, p1, _p2, p3) => obsidianLink(p1, toTitleCase(p3 ?? p1)))
     .replace(/\{@b ([A-Za-z0-9 ]+)\}/g, '**$1**')
     .replace(/\{@i ([A-Za-z0-9 ]+)\}/g, '_$1_')
+    .replace(/\{@action ([A-Za-z0-9 ]+)\}/g, (_match, p1) => obsidianLink(p1))
     .replace(/([A-Z][a-z]+) \(\{@skill ([0-9a-zA-Z ]+)\}\)/g, (_match, p1, p2) => obsidianLink(p2, `${toTitleCase(p1)} (${toTitleCase(p2)})`))
     // TODO: Still link to Abilities descriptions?
     .replace(/DC ([0-9]+) ([A-Z][a-z]+) saving/g, 'DC $1 $2 saving');
@@ -67,7 +68,7 @@ function entryToMarkdown(entry: Entry): string | undefined {
     });
 
     if (entry.type === 'inset') {
-      return `> ${markdownEntries.join(' ')}`;
+      return ['>', markdownEntries].join(' ').replaceAll('\n', '\n> ');
     }
 
     return markdownEntries.join(' ');
