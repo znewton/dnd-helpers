@@ -57,7 +57,7 @@ export interface IImage {
 
 export interface ICombatTime {
   number: number;
-  unit: 'action' | 'bonus' | 'reaction';
+  unit: 'action' | 'bonus' | 'reaction' | string;
 }
 export type CombatTime = 'Varies' | ICombatTime;
 
@@ -98,7 +98,7 @@ export async function getJsonData<T>(
   const cachedJson: T | undefined = await FiveEToolsCache.get(filename);
   const json: T = cachedJson
     ?? (await Axios.get(`${baseUrl}/${filename}`).catch((err: AxiosError) => {
-      if (err.status === 404) {
+      if (err.response?.status === 404) {
         return { data: undefined };
       }
       throw err;

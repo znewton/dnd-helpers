@@ -28,16 +28,17 @@ export interface ISpellRange {
   }
 }
 export interface ISpellComponents {
-  [SpellComponent.s]?: boolean | undefined;
-  [SpellComponent.v]?: boolean | undefined;
-  [SpellComponent.m]?: string | { text: string; cost: number; consume?: boolean | undefined; } | undefined;
+  v?: boolean | undefined;
+  s?: boolean | undefined;
+  m?: string | { text: string; cost: number; consume?: boolean | undefined; } | undefined;
 }
 export interface ISpellDuration {
   type: string;
   duration?: {
     type: string;
     amount: number;
-  } | undefined,
+  } | undefined;
+  ends?: string[];
   concentration?: boolean | undefined;
 }
 export interface ISpellFluff {
@@ -50,9 +51,9 @@ export interface ISpell {
   source: string;
   page: number;
   level: number;
-  school: SpellSchool;
+  school: keyof typeof SpellSchool;
   time: CombatTime[];
-  range: ISpellRange;
+  range?: ISpellRange | undefined;
   components: ISpellComponents;
   duration: ISpellDuration[];
   entries: Entry[];
@@ -104,5 +105,5 @@ export async function listSpells(
       });
     });
   });
-  throw new Error('Not Implemented');
+  return spells;
 }

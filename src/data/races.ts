@@ -15,7 +15,7 @@ export interface IRace {
   source: string;
   page: number;
   entries: Entry[];
-  size: CreatureSize[];
+  size: (keyof typeof CreatureSize)[];
   speed: ICreatureSpeed;
   ability: Partial<IAbility<number>>[];
   skillProficiencies: Partial<ISkill<boolean>>[];

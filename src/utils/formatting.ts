@@ -47,7 +47,7 @@ export function reformat5eToolsLinks(text: string) {
     .replace(/DC ([0-9]+) ([A-Z][a-z]+) saving/g, 'DC $1 $2 saving');
 }
 
-export function buildMarkdownPropertyTable(...rows: [string, string][]) {
+export function buildMarkdownPropertyTable(...rows: [string, string | undefined][]) {
   const table = [
     '| | |',
     '| ---: | :--- |',

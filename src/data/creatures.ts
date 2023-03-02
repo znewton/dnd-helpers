@@ -49,9 +49,9 @@ export interface ICreature extends IAbility<number> {
   name: string;
   source: string;
   page: number;
-  size: CreatureSize[];
+  size: (keyof typeof CreatureSize)[];
   type: string;
-  alignment: CreatureAlignment[];
+  alignment: (keyof typeof CreatureAlignment)[];
   ac: (number | ICreatureDetailedAC)[];
   hp: ICreatureHP;
   speed: ICreatureSpeed;

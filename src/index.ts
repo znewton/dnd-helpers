@@ -3,7 +3,7 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { listBooks } from './data';
 import {
-  generateActionsFiles, generateConditionsFiles, generateDiseasesFiles, generateSensesFiles, generateSkillsFiles,
+  generateActionsFiles, generateConditionsFiles, generateDiseasesFiles, generateSensesFiles, generateSkillsFiles, generateSpellsFiles,
 } from './generators';
 import { toTitleCase } from './utils';
 
@@ -42,6 +42,9 @@ yargs(hideBin(process.argv))
           break;
         case 'senses':
           generator = generateSensesFiles;
+          break;
+        case 'spells':
+          generator = generateSpellsFiles;
           break;
         default:
           throw new Error('Not Implemented');
