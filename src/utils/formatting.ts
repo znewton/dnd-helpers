@@ -1,3 +1,4 @@
+import type { ICreatureDetailedMovement, ICreatureSpeed } from '../data';
 import type {
   CombatTime, Entry, IEntry, TableEntryCell,
 } from '../data/common';
@@ -5,6 +6,21 @@ import { obsidianLink } from './filenames';
 
 export function toTitleCase(str: string): string {
   return str.split(' ').map((chunk) => `${chunk[0]?.toUpperCase()}${chunk.substring(1).toLowerCase()}`).join(' ');
+}
+
+export function formatCreatureSpeed(speeds: number | ICreatureSpeed): string {
+  if (typeof speeds === 'number') {
+    return `${speeds} ft.`;
+  }
+  return Object.entries(speeds).map(([type, speed]: [string, number | ICreatureDetailedMovement | undefined]) => {
+    if (speed === undefined) {
+      throw new Error('Invalid (undefined) speed for race');
+    }
+    if (typeof speed === 'number') {
+      return `${type === 'walk' ? '' : `${type} `}${speed} ft.`;
+    }
+    return `${type === 'walk' ? '' : `${type} `}${speed.number} ft. ${speed.condition}`;
+  }).join('; ');
 }
 
 export function combatTimeToString(combatTimes: CombatTime[]): string {
@@ -40,6 +56,11 @@ export function reformat5eToolsLinks(text: string) {
     .replace(/\{@creature ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/g, (_match, p1, _p2, p3) => obsidianLink(p1, toTitleCase(p3 ?? p1)))
     .replace(/\{@b ([A-Za-z0-9 ]+)\}/g, '**$1**')
     .replace(/\{@i ([A-Za-z0-9 ]+)\}/g, '_$1_')
+    .replace(/\{@atk ms\}/g, '_Melee Spell Attack_')
+    .replace(/\{@atk rs\}/g, '_Ranged Spell Attack_')
+    .replace(/\{@atk mw\}/g, '_Melee Weapon Attack_')
+    .replace(/\{@atk rw\}/g, '_Ranged Weapon Attack_')
+    .replace(/\{@atk mw,rw\}/g, '_Melee / Ranged Weapon Attack_')
     .replace(/\{@action ([A-Za-z0-9 ]+)\}/g, (_match, p1) => obsidianLink(p1))
     .replace(/^\{@note (.+)\}$/g, (_match, p1): string => `> [!note] Note\n> ${reformat5eToolsLinks(p1)}`)
     .replace(/([A-Z][a-z]+) \(\{@skill ([0-9a-zA-Z ]+)\}\)/g, (_match, p1, p2) => obsidianLink(p2, `${toTitleCase(p1)} (${toTitleCase(p2)})`))
@@ -107,7 +128,8 @@ function entryToMarkdown(entry: Entry): string | undefined {
   /**
    * Sub Entries
    */
-  if (entry.type === 'entries' || entry.type === 'inset' || entry.type === 'inline') {
+  const isIEntry = (entryToCheck: unknown): entryToCheck is IEntry => ['entries', 'inset', 'inline', 'section'].includes((entryToCheck as IEntry).type);
+  if (isIEntry(entry)) {
     const markdownEntries: string[] = [];
     if (entry.name) {
       markdownEntries.push(`**_${entry.name}._**`);
@@ -140,6 +162,9 @@ function entryToMarkdown(entry: Entry): string | undefined {
     markdownEntries.push(`| ${entry.colLabels.map(() => '---').join(' | ')} |`);
     entry.rows.forEach((row) => {
       const getTableCellText = (cell: TableEntryCell): string => {
+        if (typeof cell === 'number') {
+          return `${cell}`;
+        }
         if (typeof cell === 'string') {
           return reformat5eToolsLinks(cell);
         }
@@ -164,18 +189,32 @@ function entryToMarkdown(entry: Entry): string | undefined {
     return markdownEntries.join('\n');
   }
 
+  /**
+   * List
+   */
+  if (entry.type === 'item' || entry.type === 'itemSpell') {
+    const markdownEntries: string[] = [];
+    if (entry.name) {
+      markdownEntries.push(`**_${entry.name}._**`);
+    }
+    const markdownSubEntry = entryToMarkdown(entry.entry);
+    if (markdownSubEntry && markdownSubEntry.length) {
+      markdownEntries.push(markdownSubEntry);
+    }
+    return markdownEntries.join(' ');
+  }
   if (entry.type === 'list') {
     const markdownEntries: string[] = [];
 
     markdownEntries.push('\n');
     entry.items.forEach((item) => {
-      markdownEntries.push(`- ${reformat5eToolsLinks(item)}`);
+      markdownEntries.push(`- ${entryToMarkdown(item)}`);
     });
     markdownEntries.push('\n');
     return markdownEntries.join('\n');
   }
 
-  throw new Error(`Invalid entry type encountered: ${entry.type}`);
+  throw new Error(`Invalid entry type encountered: ${JSON.stringify(entry)}`);
 }
 export function entriesToMarkdown(entries: Entry[]): string {
   const markdownEntries: string[] = [];

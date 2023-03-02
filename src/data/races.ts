@@ -16,8 +16,9 @@ export interface IRace {
   page: number;
   entries: Entry[];
   size: (keyof typeof CreatureSize)[];
-  speed: ICreatureSpeed;
-  ability: Partial<IAbility<number>>[];
+  speed: number | ICreatureSpeed;
+  lineage?: undefined | 'VRGR' | string;
+  ability?: Partial<IAbility<number>>[] | undefined;
   skillProficiencies: Partial<ISkill<boolean>>[];
   languageProficiencies: { [language: string]: boolean | number | undefined }[];
   // TODO: Legacy races. "reprintedAs" on some of them.
@@ -44,12 +45,12 @@ export async function listRaces(): Promise<IRace[]> {
   );
   const racesFluffMap: Record<string, IRaceFluff> = {};
   racesFluffJson.raceFluff.forEach((raceFluff) => {
-    racesFluffMap[raceFluff.name] = raceFluff;
+    racesFluffMap[`${raceFluff.name}_${raceFluff.source.toLowerCase()}`] = raceFluff;
   });
   return racesJson.race
     .filter((race) => ownedSourceBooks.includes(race.source.toLowerCase()))
     .map((race) => ({
       ...race,
-      fluff: racesFluffMap[race.name],
+      fluff: racesFluffMap[`${race.name}_${race.source.toLowerCase()}`],
     }));
 }

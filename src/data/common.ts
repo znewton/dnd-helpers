@@ -5,9 +5,9 @@ import { JsonCache } from '../utils';
 export const FiveEToolsBasePath = 'https://raw.githubusercontent.com/5etools-mirror-1/5etools-mirror-1.github.io/master';
 export const FiveEToolsCache = new JsonCache(path.join(__dirname, '../cache'));
 
-export type Entry = IEntry | ITableEntry | IListEntry | IWrapperEntry | ILinkEntry | string;
+export type Entry = IEntry | ITableEntry | IListEntry | IWrapperEntry | ILinkEntry | IItemEntry | string;
 export interface IEntry {
-  type: 'entries' | 'inset' | 'inline';
+  type: 'entries' | 'inset' | 'inline' | 'section';
   name?: string;
   entries: Entry[];
 }
@@ -22,7 +22,7 @@ export interface ILinkEntry {
   href: IHref;
   text: string;
 }
-export type TableEntryCell = string | {
+export type TableEntryCell = number | string | {
   entry?: Entry | undefined;
   roll?: {
     exact?: number | undefined;
@@ -37,9 +37,14 @@ export interface ITableEntry {
   colStyles: string[];
   rows: (string | TableEntryCell)[][];
 }
+export interface IItemEntry {
+  type: 'item' | 'itemSpell';
+  name: string;
+  entry: Entry;
+}
 export interface IListEntry {
   type: 'list';
-  items: string[];
+  items: (string | IItemEntry)[];
 }
 export interface IWrapperEntry {
   type: 'wrapper';

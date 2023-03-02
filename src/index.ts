@@ -3,7 +3,7 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { listBooks } from './data';
 import {
-  generateActionsFiles, generateConditionsFiles, generateDiseasesFiles, generateSensesFiles, generateSkillsFiles, generateSpellsFiles,
+  generateActionsFiles, generateConditionsFiles, generateDiseasesFiles, generateRacesFiles, generateSensesFiles, generateSkillsFiles, generateSpellsFiles,
 } from './generators';
 import { toTitleCase } from './utils';
 
@@ -46,6 +46,9 @@ yargs(hideBin(process.argv))
         case 'spells':
           generator = generateSpellsFiles;
           break;
+        case 'races':
+          generator = generateRacesFiles;
+          break;
         default:
           throw new Error('Not Implemented');
       }
@@ -63,7 +66,7 @@ yargs(hideBin(process.argv))
           const th = 'Owned? ... Alias ... Name';
           process.stdout.write(`${th}\n`);
           process.stdout.write(`${'-'.repeat(th.length)}\n`);
-          process.stdout.write(books.map((book) => `${book.owned ? '✅' : '🚫'}  ... ${book.id} ... ${book.name}`).join('\n'));
+          process.stdout.write(books.sort((bookA, bookB) => new Date(bookA.published).getTime() - new Date(bookB.published).getTime()).map((book) => `${book.owned ? '✅' : '🚫'}  ... ${book.id} ... ${book.name}`).join('\n'));
         });
     },
   )
