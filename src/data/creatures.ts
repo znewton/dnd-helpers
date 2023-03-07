@@ -4,12 +4,16 @@ import {
 import config from '../config';
 
 export enum CreatureSize {
+  F = 'Fine',
+  D = 'Diminutive',
   T = 'Tiny',
   S = 'Small',
   M = 'Medium',
   L = 'Large',
   H = 'Huge',
   G = 'Gargantuan',
+  C = 'Colossal',
+  V = 'Varies',
 }
 export enum CreatureAlignment {
   G = 'Good',
@@ -48,9 +52,10 @@ export interface ICreatureFluff {
 export interface ICreature extends IAbility<number> {
   name: string;
   source: string;
+  otherSources?: { source: string; page: number; }[]
   page: number;
   size: (keyof typeof CreatureSize)[];
-  type: string;
+  type: string | { type: string };
   alignment: (keyof typeof CreatureAlignment)[];
   ac: (number | ICreatureDetailedAC)[];
   hp: ICreatureHP;
@@ -59,8 +64,8 @@ export interface ICreature extends IAbility<number> {
   skill?: Partial<ISkill<string>> | undefined;
   senses?: string[] | undefined;
   /**
-     * Passive Perception
-     */
+   * Passive Perception
+   */
   passive: number;
   cr: string;
   trait?: Entry[] | undefined;

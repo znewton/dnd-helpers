@@ -1,4 +1,5 @@
 import config from '../config';
+import { isOwned } from '../utils';
 import {
   CombatTime,
   Entry, FiveEToolsBasePath, getJsonData,
@@ -25,5 +26,5 @@ export async function listActions(): Promise<IAction[]> {
     { action: [] },
   );
   return actionsJson.action
-    .filter((action) => ownedSourceBooks.includes(action.source.toLowerCase()));
+    .filter((item) => isOwned(ownedSourceBooks, item));
 }

@@ -1,4 +1,5 @@
 import config from '../config';
+import { isOwned } from '../utils';
 import {
   Entry, FiveEToolsBasePath, getJsonData,
 } from './common';
@@ -38,5 +39,5 @@ export async function listDiseases(): Promise<IDisease[]> {
     { condition: [], disease: [] },
   );
   return conditionsDiseasesJson.disease
-    .filter((disease) => ownedSourceBooks.includes(disease.source.toLowerCase()));
+    .filter((item) => isOwned(ownedSourceBooks, item));
 }

@@ -3,9 +3,21 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { listBooks } from './data';
 import {
-  generateActionsFiles, generateConditionsFiles, generateDiseasesFiles, generateRacesFiles, generateSensesFiles, generateSkillsFiles, generateSpellsFiles,
+  generateActionsFiles, generateConditionsFiles, generateCreaturesFiles, generateDiseasesFiles, generateRacesFiles, generateSensesFiles, generateSkillsFiles, generateSpellsFiles,
 } from './generators';
 import { toTitleCase } from './utils';
+
+const generators: Record<string, () => Promise<void>> = {
+  items: async () => Promise.reject(new Error('Not implemented')),
+  creatures: generateCreaturesFiles,
+  spells: generateSpellsFiles,
+  actions: generateActionsFiles,
+  conditions: generateConditionsFiles,
+  diseases: generateDiseasesFiles,
+  races: generateRacesFiles,
+  senses: generateSensesFiles,
+  skills: generateSkillsFiles,
+};
 
 yargs(hideBin(process.argv))
   .command(
@@ -13,45 +25,14 @@ yargs(hideBin(process.argv))
     'Generate helper files for type',
     (y) => y.positional('type', {
       demandOption: true,
-      choices: [
-        'items',
-        'creatures',
-        'spells',
-        'actions',
-        'conditions',
-        'diseases',
-        'races',
-        'senses',
-        'skills',
-      ],
+      choices: Object.keys(generators),
     }),
     (argv) => {
-      let generator: () => Promise<void>;
-      switch (argv.type) {
-        case 'actions':
-          generator = generateActionsFiles;
-          break;
-        case 'conditions':
-          generator = generateConditionsFiles;
-          break;
-        case 'diseases':
-          generator = generateDiseasesFiles;
-          break;
-        case 'skills':
-          generator = generateSkillsFiles;
-          break;
-        case 'senses':
-          generator = generateSensesFiles;
-          break;
-        case 'spells':
-          generator = generateSpellsFiles;
-          break;
-        case 'races':
-          generator = generateRacesFiles;
-          break;
-        default:
-          throw new Error('Not Implemented');
+      const generator = generators[argv.type];
+      if (!generator) {
+        throw new Error('Not Implemented');
       }
+
       console.log(`Generating ${toTitleCase(argv.type)}`);
       generator().catch(console.error);
     },

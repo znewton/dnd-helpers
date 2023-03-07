@@ -1,5 +1,6 @@
 export { generateActionsFiles } from './actions';
 export { generateConditionsFiles } from './conditions';
+export { generateCreaturesFiles } from './creatures';
 export { generateDiseasesFiles } from './diseases';
 export { generateRacesFiles } from './races';
 export { generateSensesFiles } from './senses';

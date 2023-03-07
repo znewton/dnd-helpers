@@ -47,13 +47,23 @@ export function reformat5eToolsLinks(text: string) {
   if (typeof text !== 'string') {
     throw new Error('Invalid 5eTools text: not a string');
   }
+  // if (/\{@item ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/.test(text)) {
+  //   console.log('Item link', text);
+  // }
+  // if (/\{@creature ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/.test(text)) {
+  //   console.log('Creature link', text);
+  // }
+  // if (/\{@quickref ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/.test(text)) {
+  //   console.log('QuickRef link', text);
+  // }
   return text
     .replace(/\{@condition ([a-zA-Z0-9 ]+)\}/g, (_match, p1) => obsidianLink(p1, toTitleCase(p1)))
     .replace(/\{@dice ([0-9a-zA-Z+ ]+)\}/g, '`dice: $1` ($1)')
     .replace(/\{@damage ([0-9a-zA-Z+ ]+)\}/g, '`dice: $1` ($1)')
     .replace(/\{@spell ([0-9a-zA-Z ]+)\}/g, (_match, p1) => obsidianLink(p1, p1.toLowerCase()))
-    .replace(/\{@item ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/g, (_match, p1, _p2, p3) => obsidianLink(p1, toTitleCase(p3 ?? p1)))
-    .replace(/\{@creature ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/g, (_match, p1, _p2, p3) => obsidianLink(p1, toTitleCase(p3 ?? p1)))
+    .replace(/\{@item ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/g, (_match, p1) => obsidianLink(p1, toTitleCase(p1)))
+    .replace(/\{@creature ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/g, (_match, p1) => obsidianLink(p1, toTitleCase(p1)))
+    .replace(/\{@quickref ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/g, (_match, p1) => obsidianLink(p1, toTitleCase(p1)))
     .replace(/\{@b ([A-Za-z0-9 ]+)\}/g, '**$1**')
     .replace(/\{@i ([A-Za-z0-9 ]+)\}/g, '_$1_')
     .replace(/\{@atk ms\}/g, '_Melee Spell Attack_')

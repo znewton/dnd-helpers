@@ -1,4 +1,5 @@
 import config from '../config';
+import { isOwned } from '../utils';
 import {
   Entry, FiveEToolsBasePath, getJsonData,
 } from './common';
@@ -22,5 +23,5 @@ export async function listSenses(): Promise<ISense[]> {
     { sense: [] },
   );
   return sensesJson.sense
-    .filter((sense) => ownedSourceBooks.includes(sense.source.toLowerCase()));
+    .filter((item) => isOwned(ownedSourceBooks, item));
 }

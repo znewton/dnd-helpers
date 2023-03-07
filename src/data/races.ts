@@ -1,4 +1,5 @@
 import config from '../config';
+import { isOwned } from '../utils';
 import {
   Entry, FiveEToolsBasePath, getJsonData, IAbility, IImage, ISkill,
 } from './common';
@@ -48,7 +49,7 @@ export async function listRaces(): Promise<IRace[]> {
     racesFluffMap[`${raceFluff.name}_${raceFluff.source.toLowerCase()}`] = raceFluff;
   });
   return racesJson.race
-    .filter((race) => ownedSourceBooks.includes(race.source.toLowerCase()))
+    .filter((item) => isOwned(ownedSourceBooks, item))
     .map((race) => ({
       ...race,
       fluff: racesFluffMap[`${race.name}_${race.source.toLowerCase()}`],

@@ -1,4 +1,5 @@
 import config from '../config';
+import { isOwned } from '../utils';
 import {
   Entry, FiveEToolsBasePath, getJsonData,
 } from './common';
@@ -22,5 +23,5 @@ export async function listSkillDescriptions(): Promise<ISkillDescription[]> {
     { skill: [] },
   );
   return skillsJson.skill
-    .filter((skill) => ownedSourceBooks.includes(skill.source.toLowerCase()));
+    .filter((item) => isOwned(ownedSourceBooks, item));
 }
