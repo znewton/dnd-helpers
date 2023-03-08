@@ -1,7 +1,7 @@
 import {
   Entry, FiveEToolsBasePath, getJsonData, IAbility, IImage, ISkill,
 } from './common';
-import config from '../config';
+import { getOwnedSourceBooks } from '../utils';
 
 export enum CreatureSize {
   F = 'Fine',
@@ -80,7 +80,7 @@ const creaturesBaseUrl = `${FiveEToolsBasePath}/data/bestiary`;
 export async function listCreatures(
   options: { includeFluff: boolean } = { includeFluff: true },
 ): Promise<ICreature[]> {
-  const { ownedSourceBooks } = config;
+  const ownedSourceBooks = getOwnedSourceBooks();
   const bestiaryFiles = ownedSourceBooks.map((alias) => `bestiary-${alias}.json`);
   const bestiaryReadPs: Promise<MonsterJson>[] = [];
   [...bestiaryFiles].forEach((fileName) => {

@@ -1,4 +1,4 @@
-import config from '../config';
+import { isOwned } from '../utils';
 import { FiveEToolsBasePath, getJsonData } from './common';
 
 export interface ISourceBook {
@@ -17,7 +17,6 @@ type BookJson = { book: ISourceBook[]; };
 const booksJsonFileName = 'books.json';
 const booksBaseUrl = `${FiveEToolsBasePath}/data`;
 export async function listBooks(): Promise<ISourceBook[]> {
-  const { ownedSourceBooks } = config;
   const booksJson: BookJson = await getJsonData(
     booksJsonFileName,
     booksBaseUrl,
@@ -25,6 +24,6 @@ export async function listBooks(): Promise<ISourceBook[]> {
   );
   return booksJson.book.map((book) => ({
     ...book,
-    owned: ownedSourceBooks.includes(book.id.toLowerCase()),
+    owned: isOwned({ source: book.id }),
   }));
 }

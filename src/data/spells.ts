@@ -1,4 +1,4 @@
-import config from '../config';
+import { getOwnedSourceBooks } from '../utils';
 import {
   CombatTime,
   Entry, FiveEToolsBasePath, getJsonData, IImage,
@@ -67,7 +67,7 @@ const spellsBaseUrl = `${FiveEToolsBasePath}/data/spells`;
 export async function listSpells(
   options: { includeFluff: boolean } = { includeFluff: true },
 ): Promise<ISpell[]> {
-  const { ownedSourceBooks } = config;
+  const ownedSourceBooks = getOwnedSourceBooks();
   const spellFiles = ownedSourceBooks.map((alias) => `spells-${alias}.json`);
   const spellReadPs: Promise<SpellJson>[] = [];
   [...spellFiles].forEach((filename) => {

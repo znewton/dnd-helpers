@@ -11,6 +11,7 @@ export {
   entriesToMarkdown,
 } from './formatting';
 export {
+  getOwnedSourceBooks,
   isOwned,
 } from './ownership';
 export {

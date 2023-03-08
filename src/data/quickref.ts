@@ -1,4 +1,3 @@
-import config from '../config';
 import { isOwned } from '../utils';
 import {
   Entry, FiveEToolsBasePath, getJsonData, IEntry,
@@ -28,7 +27,6 @@ const quickRefsFilename = 'bookref-quick.json';
 const quickRefsBaseUrl = `${FiveEToolsBasePath}/data/generated`;
 
 export async function listQuickRef(): Promise<IQuickRef[]> {
-  const { ownedSourceBooks } = config;
   const quickRefsJson: QuickRefsJson = await getJsonData(
     quickRefsFilename,
     quickRefsBaseUrl,
@@ -41,5 +39,5 @@ export async function listQuickRef(): Promise<IQuickRef[]> {
     });
   });
   return quickRefEntries
-    .filter((quickRefEntry) => isOwned(ownedSourceBooks, quickRefEntry));
+    .filter((quickRefEntry) => isOwned(quickRefEntry));
 }

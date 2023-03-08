@@ -1,4 +1,3 @@
-import config from '../config';
 import { isOwned } from '../utils';
 import {
   Entry, FiveEToolsBasePath, getJsonData,
@@ -16,12 +15,11 @@ const skillsFilename = 'skills.json';
 const skillsBaseUrl = `${FiveEToolsBasePath}/data`;
 
 export async function listSkillDescriptions(): Promise<ISkillDescription[]> {
-  const { ownedSourceBooks } = config;
   const skillsJson: SkillsJson = await getJsonData(
     skillsFilename,
     skillsBaseUrl,
     { skill: [] },
   );
   return skillsJson.skill
-    .filter((item) => isOwned(ownedSourceBooks, item));
+    .filter((item) => isOwned(item));
 }
