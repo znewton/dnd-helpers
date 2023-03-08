@@ -101,11 +101,13 @@ export async function generateRacesFiles() {
   Object.entries(raceSources).forEach(([name, sources]) => {
     const srcs = [...sources].sort((sourceA, sourceB) => {
       const [orderA, orderB] = [sourcePublishOrder[sourceA.toLowerCase()], sourcePublishOrder[sourceB.toLowerCase()]];
-      if (orderA === undefined || orderB === undefined) {
-        throw new Error(`Missing race source publishing order: ${name}`);
-      }
+      // if (orderA === undefined || orderB === undefined) {
+      //   throw new Error(`Missing race source publishing order: ${name}: ${JSON.stringify({
+      //     sourceA, orderA, sourceB, orderB,
+      //   })}`);
+      // }
       // Sort race editions from latest to earliest
-      return orderB - orderA;
+      return (orderB ?? Number.MIN_SAFE_INTEGER) - (orderA ?? Number.MAX_SAFE_INTEGER);
     });
     raceSources[name] = srcs;
   });
@@ -114,7 +116,7 @@ export async function generateRacesFiles() {
       // Skip all but latest race editions.
       return;
     }
-    console.log(race.name, race.source.toLowerCase());
+    // console.log(race.name, race.source.toLowerCase());
     const filePath = path.join(outputDir, `${normalizeFilename(race.name)}.md`);
     const fileContents = raceToMarkdown(race);
     fileWritePs.push(fs.writeFile(filePath, fileContents));

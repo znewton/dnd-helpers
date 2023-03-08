@@ -65,7 +65,7 @@ type SpellJson = { spell: Omit<ISpell, 'fluff'>[] };
 type SpellFluffJson = { spellFluff: ISpellFluff[] };
 const spellsBaseUrl = `${FiveEToolsBasePath}/data/spells`;
 export async function listSpells(
-  options: { includeFluff: boolean } = { includeFluff: false },
+  options: { includeFluff: boolean } = { includeFluff: true },
 ): Promise<ISpell[]> {
   const { ownedSourceBooks } = config;
   const spellFiles = ownedSourceBooks.map((alias) => `spells-${alias}.json`);

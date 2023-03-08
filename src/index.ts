@@ -25,9 +25,19 @@ yargs(hideBin(process.argv))
     'Generate helper files for type',
     (y) => y.positional('type', {
       demandOption: true,
-      choices: Object.keys(generators),
+      choices: ['all', ...Object.keys(generators)],
     }),
     (argv) => {
+      if (argv.type === 'all') {
+        Object.entries(generators).forEach(([name, generator]) => {
+          console.log(`Generating ${toTitleCase(name)}`);
+          generator().catch((error) => {
+            console.error(`Error generating ${name}`);
+            console.error(error);
+          });
+        });
+        return;
+      }
       const generator = generators[argv.type];
       if (!generator) {
         throw new Error('Not Implemented');

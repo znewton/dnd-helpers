@@ -5,7 +5,7 @@ import { JsonCache } from '../utils';
 export const FiveEToolsBasePath = 'https://raw.githubusercontent.com/5etools-mirror-1/5etools-mirror-1.github.io/58a8d513ee627e6f8312a2642e672a652bf2b9c0';
 export const FiveEToolsCache = new JsonCache(path.join(__dirname, '../cache'));
 
-export type Entry = IEntry | ITableEntry | IListEntry | IWrapperEntry | ILinkEntry | IItemEntry | string;
+export type Entry = IEntry | ITableEntry | IListEntry | IWrapperEntry | ILinkEntry | IItemEntry | IQuoteEntry | string;
 export interface IEntry {
   type: 'entries' | 'inset' | 'inline' | 'section';
   name?: string;
@@ -50,6 +50,11 @@ export interface IWrapperEntry {
   type: 'wrapper';
   data: any;
   wrapped: Entry;
+}
+export interface IQuoteEntry {
+  type: 'quote';
+  entries: Entry[];
+  by: string;
 }
 
 export interface IImage {

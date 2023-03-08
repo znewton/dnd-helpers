@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import type { ICreatureDetailedMovement, ICreatureSpeed } from '../data';
 import type {
   CombatTime, Entry, IEntry, TableEntryCell,
@@ -142,23 +143,29 @@ function entryToMarkdown(entry: Entry): string | undefined {
   if (isIEntry(entry)) {
     const markdownEntries: string[] = [];
     if (entry.name) {
-      markdownEntries.push(`**_${entry.name}._**`);
+      markdownEntries.push(`${!['inset', 'inline'].includes(entry.type) ? '\n\n' : ''}**_${entry.name}._**`);
     }
 
-    entry.entries.forEach((subEntry) => {
-      const markdownSubEntry = entryToMarkdown(subEntry);
-      if (markdownSubEntry && markdownSubEntry.length) {
-        markdownEntries.push(markdownSubEntry);
-      }
-    });
+    markdownEntries.push(entriesToMarkdown(entry.entries, ' '));
 
     if (entry.type === 'inset') {
-      return ['>', markdownEntries].join(' ').replaceAll('\n', '\n> ');
+      return `\n\n> ${markdownEntries.join('\n').replaceAll('\n', '\n> ')}`;
     } if (entry.type === 'inline') {
       markdownEntries.join(' ').replaceAll('\n', ' ');
     }
 
     return markdownEntries.join(' ');
+  }
+
+  /**
+   * Quote
+   */
+  if (entry.type === 'quote') {
+    const markdownEntries: string[] = [];
+    markdownEntries.push('> [!quote]');
+    markdownEntries.push(entriesToMarkdown(entry.entries));
+    markdownEntries.push(`— ${entry.by}`);
+    return markdownEntries.join('\n').replaceAll('\n', '\n> ');
   }
 
   /**
@@ -226,7 +233,7 @@ function entryToMarkdown(entry: Entry): string | undefined {
 
   throw new Error(`Invalid entry type encountered: ${JSON.stringify(entry)}`);
 }
-export function entriesToMarkdown(entries: Entry[]): string {
+export function entriesToMarkdown(entries: Entry[], joiner: string = '\n'): string {
   const markdownEntries: string[] = [];
 
   entries.forEach((entry) => {
@@ -236,5 +243,5 @@ export function entriesToMarkdown(entries: Entry[]): string {
     }
   });
 
-  return markdownEntries.join('\n\n');
+  return markdownEntries.join(joiner);
 }
