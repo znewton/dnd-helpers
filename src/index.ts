@@ -5,6 +5,7 @@ import { listBooks } from './data';
 import {
   generateActionsFiles, generateConditionsFiles, generateCreaturesFiles, generateDiseasesFiles, generateRacesFiles, generateSensesFiles, generateSkillsFiles, generateSpellsFiles,
 } from './generators';
+import { itemMarkdownToCard } from './misc';
 import { toTitleCase } from './utils';
 
 const generators: Record<string, () => Promise<void>> = {
@@ -59,6 +60,17 @@ yargs(hideBin(process.argv))
           process.stdout.write(`${'-'.repeat(th.length)}\n`);
           process.stdout.write(books.sort((bookA, bookB) => new Date(bookA.published).getTime() - new Date(bookB.published).getTime()).map((book) => `${book.owned ? '✅' : '🚫'}  ... ${book.id} ... ${book.name}`).join('\n'));
         });
+    },
+  )
+  .command(
+    'build-item-card <item-file-path>',
+    'build an HTML item card from Markdown',
+    (y) => y.positional('itemFilePath', {
+      demandOption: true,
+      type: 'string',
+    }),
+    (argv) => {
+      itemMarkdownToCard(argv.itemFilePath).catch(console.error);
     },
   )
   .help()

@@ -11,6 +11,7 @@ const config: IConfig = {
     'egw',
     'tce',
     'mpmm',
+    'erlw',
   ],
   // outputRootDir: path.join(os.homedir(), '/Documents/DND/Rules'),
   outputRootDir: path.join(__dirname, '../../test'),
