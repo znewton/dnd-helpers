@@ -1,22 +1,6 @@
 import { isOwned } from '../utils';
 import { Entry, FiveEToolsBasePath, getJsonData } from './common';
 
-export interface IItemProperty {
-  abbreviation: string;
-  source: string;
-  page: number;
-  entries: Entry[];
-  // TODO: these have special templates like {{prop_name}} and {{item.range}}
-  template: string;
-}
-
-export interface IItemType {
-  abbreviation: string;
-  source: string;
-  page: number;
-  name: string;
-  entries: Entry[];
-}
 export interface IItemTypeAdditionalEntries {
   appliesTo: string;
   source: string;
@@ -30,12 +14,106 @@ export interface IItemEntry {
   entriesTemplate: Entry[];
 }
 
+export enum ItemDamageTypeAbbrev {
+  A = 'Acid',
+  B = 'Bludgeoning',
+  C = 'Cold',
+  F = 'Fire',
+  O = 'Force',
+  L = 'Lightning',
+  N = 'Necrotic',
+  P = 'Piercing',
+  I = 'Poison',
+  Y = 'Psychic',
+  R = 'Radiant',
+  S = 'Slashing',
+  T = 'Thunder',
+}
+
+export enum ItemTypeAbbrev {
+  R = 'Ranged Weapon',
+  M = 'Melee Weapon',
+  A = 'Ammunition',
+  HA = 'Heavy Armor',
+  MA = 'Medium Armor',
+  LA = 'Light Armor',
+  S = 'Shield',
+  SCF = 'Spellcasting Focus',
+  AIR = 'Vehicle (Air)',
+  SHP = 'Vehicle (Water)',
+  SPC = 'Vehicle (Space)',
+  VEH = 'Vehicle (Land)',
+  AT = 'Artisan Tools',
+  EXP = 'Explosive',
+  EM = 'Eldritch Machine',
+  F = 'Food',
+  GS = 'Gaming Set',
+  INS = 'Instrument',
+  TG = 'Trade Good',
+  RG = 'Ring',
+  RD = 'Rod',
+  WD = 'Wand',
+  GV = 'Generic Variant',
+  G = 'Adventuring Gear',
+  MNT = 'Mount',
+  MR = 'Master Rune',
+  OTH = 'Other',
+  P = 'Potion',
+  SC = 'Scroll',
+  T = 'Tools',
+  TAH = 'Tack & Harness',
+  '$' = 'Treasure',
+}
+
+export enum ItemPropertyAbbrev {
+  A = 'Ammunition',
+  AF = 'Ammunition (Firearm)',
+  BF = 'Burst Fire',
+  F = 'Finesse',
+  H = 'Heavy',
+  L = 'Light',
+  LD = 'Loading',
+  R = 'Reach',
+  RLD = 'Reload',
+  S = 'Special',
+  T = 'Thrown',
+  '2H' = 'Two-Handed',
+  V = 'Versatile',
+}
+
+export enum ItemRechargeToFull {
+  round = 'Every Round',
+  restShort = 'Short Rest',
+  restLong = 'Long Rest',
+  dawn = 'Dawn',
+  dusk = 'Dusk',
+  midnight = 'Midnight',
+  special = 'Special',
+}
+
+export interface IItemType {
+  abbreviation: keyof typeof ItemTypeAbbrev;
+  source: string;
+  page: number;
+  name?: string;
+  entries: Entry[];
+}
+
+export interface IItemProperty {
+  abbreviation: keyof typeof ItemPropertyAbbrev;
+  source: string;
+  page: number;
+  entries?: Entry[];
+  // TODO: these have special templates like {{prop_name}} and {{item.range}}
+  template?: string;
+}
+
 export interface IItemBase {
   name: string;
   source: string;
   otherSources?: { source: string, page: number }[];
   page: number;
-  type?: string;
+  type?: keyof typeof ItemTypeAbbrev;
   /**
    * Spellcasting Focus Type
    */
@@ -44,7 +122,7 @@ export interface IItemBase {
   weight?: number;
   value?: number;
   weaponCategory?: string;
-  property: string[];
+  property: (keyof typeof ItemPropertyAbbrev)[];
   age?: string;
   /**
    * Weapons
@@ -52,7 +130,7 @@ export interface IItemBase {
   range?: string;
   dmg1?: string;
   dmg2?: string;
-  dmgType?: string;
+  dmgType?: keyof typeof ItemDamageTypeAbbrev;
   weapon?: boolean;
   spear?: boolean;
   firearm?: boolean;
@@ -124,6 +202,7 @@ interface IContainerCapacity {
   weightless?: boolean;
 }
 
+// TODO: Reference 5etools parser for more info https://github.com/5etools-mirror-1/5etools-mirror-1.github.io/blob/6b51e49fb048372a06bddd741cb670a71ad4d8c5/js/parser.js#L641
 export interface IItem extends IItemBase {
   additionalSources?: { source: string; page: number; }[];
   tier?: string;
@@ -164,14 +243,15 @@ export interface IItem extends IItemBase {
   atomicPackContents?: boolean;
   focus?: string[];
   lootTables?: string[];
-  recharge?: string;
+  recharge?: keyof typeof ItemRechargeToFull;
   // Sometimes like {@dice 1d20}
   rechargeAmount?: string | number;
   charges?: number;
   miscTags?: string[];
   detail1?: string;
   poisonTypes?: string[];
-  // If true, entries can have like {#itemEntry Absorbing Tattoo|TCE}
+  // If true, entries can have like "{#itemEntry Absorbing Tattoo|TCE}"
+  // Use either `itemGroup` from items.json or `itemEntry` from items-base.json
   hasRefs?: boolean;
   attachedSpells?: string[];
   // Sometimes like `replicate magic item|tce`
@@ -201,6 +281,14 @@ interface IItemGroup extends IItem {
   items: string[];
 }
 
+/**
+ * Item with attached relevant information like
+ * extensions (_copy), property information, type information, etc.
+ */
+export interface IItemEx extends IItem {
+
+}
+
 type ItemsBaseJson = {
   item: IItem[];
   itemProperty: IItemProperty[];
@@ -218,7 +306,7 @@ type ItemsJson = {
 const itemsFilename = 'items.json';
 const itemsBaseUrl = `${FiveEToolsBasePath}/data`;
 
-export async function listItems(): Promise<IItem[]> {
+export async function listItems(): Promise<IItemEx[]> {
   const itemsBaseJson = await getJsonData<ItemsBaseJson>(
     itemsBaseFilename,
     itemsBaseBaseUrl,

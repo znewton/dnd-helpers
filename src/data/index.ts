@@ -37,6 +37,7 @@ export {
   listCreatures,
 } from './creatures';
 export {
+  IItemEx,
   listItems,
 } from './items';
 export {
