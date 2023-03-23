@@ -38,6 +38,10 @@ export {
 } from './creatures';
 export {
   IItemEx,
+  ItemDamageTypeAbbrev,
+  ItemTypeAbbrev,
+  ItemPropertyAbbrev,
+  ItemRechargeToFull,
   listItems,
 } from './items';
 export {

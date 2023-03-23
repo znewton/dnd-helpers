@@ -31,8 +31,8 @@ export enum ItemDamageTypeAbbrev {
 }
 
 export enum ItemTypeAbbrev {
-  R = 'Ranged Weapon',
-  M = 'Melee Weapon',
+  R = 'Weapon, Ranged',
+  M = 'Weapon, Melee',
   A = 'Ammunition',
   HA = 'Heavy Armor',
   MA = 'Medium Armor',
@@ -213,6 +213,7 @@ export interface IItem extends IItemBase {
     background?: string;
     alignment?: string;
     creatureType?: string;
+    race?: string;
   }[];
   // Categories
   wondrous?: boolean;
