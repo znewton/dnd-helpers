@@ -27,6 +27,7 @@ const config: IConfig = {
     senses: 'Mechanics/Senses',
     races: 'Reference/Races',
     classes: 'Reference/Classes',
+    datatables: '',
   },
 };
 export default config;

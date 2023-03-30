@@ -12,6 +12,9 @@ import {
 
 function creatureToMarkdown(creature: ICreature): string {
   const ttrpgStatblock = build5eMonsterFromJson(creature as any);
+  if (creature.environment) {
+    (ttrpgStatblock as any).environment = creature.environment;
+  }
   const statblockYaml = new YamlDocument({ ...ttrpgStatblock });
   return `---
 alias: ${toTitleCase(creature.name)}

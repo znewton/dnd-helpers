@@ -1,5 +1,6 @@
 import path from 'path';
 import { promises as fs } from 'fs';
+import { Document as YamlDocument } from 'yaml';
 import config from '../config';
 import { ISpell, listSpells, SpellSchool } from '../data';
 import {
@@ -24,17 +25,16 @@ function formatSpellLevel(level: ISpell['level']): string {
 }
 
 function formatSpellComponents(components: ISpell['components']): string {
-  // TODO: generate component info files from data/generated/bookref-quick.json
   const comonentStr = [];
   if (components.v) {
-    comonentStr.push('[V](Components#Verbal%20(V))');
+    comonentStr.push('V');
   }
   if (components.s) {
-    comonentStr.push('[S](Components#Somatic%20(S))');
+    comonentStr.push('S');
   }
   if (components.m) {
     const materials = typeof components.m === 'string' ? components.m : components.m.text;
-    comonentStr.push(`[M](Components#Material%20(M)) _(${materials})_`);
+    comonentStr.push(`M _(${materials})_`);
   }
   return comonentStr.join(', ');
 }
@@ -138,21 +138,40 @@ function formatSpellDescription(spell: ISpell): string {
 }
 
 function spellToMarkdown(spell: ISpell): string {
+  const name = toTitleCase(spell.name);
+  const level = formatSpellLevel(spell.level);
+  const school = SpellSchool[spell.school];
+  const components = formatSpellComponents(spell.components);
+  const castingTime = spell.time ? combatTimeToString(spell.time) : '-';
+  const range = formatSpellRange(spell.range);
+  const duration = formatSpellDuration(spell.duration);
+  const classes = spell.classes?.join(', ');
+  const metadata = new YamlDocument({
+    name,
+    level,
+    school,
+    components,
+    castingTime,
+    range,
+    duration,
+    classes,
+  });
   return `---
-alias: ${toTitleCase(spell.name)}
+alias: ${name}
 tags: 5eTools, spell
+${metadata.toString()}
 ---
 
-# ${toTitleCase(spell.name)}
+# ${name}
 
 ${buildMarkdownPropertyTable(
-    ['Casting Time', spell.time ? combatTimeToString(spell.time) : '-'],
+    ['Casting Time', castingTime],
     ['Duration', formatSpellDuration(spell.duration)],
-    ['Range/Area', formatSpellRange(spell.range)],
-    ['Components', formatSpellComponents(spell.components)],
-    ['Level', formatSpellLevel(spell.level)],
-    ['School', SpellSchool[spell.school]],
-    // TODO: classes
+    ['Range/Area', range],
+    ['Components', components],
+    ['Level', level],
+    ['School', school],
+    ['Classes', classes],
   )}
 
 ${formatSpellDescription(spell)}

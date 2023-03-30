@@ -1,5 +1,6 @@
 import path from 'path';
 import { promises as fs } from 'fs';
+import { Document as YamlDocument } from 'yaml';
 import config from '../config';
 import {
   IItemEx, ItemDamageTypeAbbrev, ItemPropertyAbbrev, ItemTypeAbbrev, listItems,
@@ -104,17 +105,17 @@ function formatItemArmorClass(item: IItemEx) {
 }
 
 function formatItemProperties(item: IItemEx) {
+  // TODO: Links or footnotes? Do these exist in Quickref?
   const props = [];
   if (item.range) {
-    // TODO: Link or footnote? Do these exist in Quickref?
-    props.push(`[[Range]] (${item.range} ft.)`);
+    props.push(`Range (${item.range} ft.)`);
   }
   item.property.forEach((property) => {
     if (property === 'V') {
-      props.unshift(`[[Versatile]] (${item.dmg2})`);
+      props.unshift(`Versatile (${item.dmg2})`);
       return;
     }
-    props.push(`[[${ItemPropertyAbbrev[property]}]]`);
+    props.push(`${ItemPropertyAbbrev[property]}`);
   });
   return props.join(', ');
 }
@@ -123,9 +124,9 @@ function formatItemRequirements(item: IItemEx) {
   const reqs: string[] = [];
 
   if (item.reqAttune === true) {
-    reqs.push('[[Attunement]]');
+    reqs.push('Attunement');
   } else if (typeof item.reqAttune === 'string') {
-    reqs.push(`[[Attunment]] ${item.reqAttune}`);
+    reqs.push(`Attunment ${item.reqAttune}`);
   }
 
   if (item.strength) {
@@ -153,22 +154,43 @@ function formatItemDescription(item: IItemEx): string {
 }
 
 function itemToMarkdown(item: IItemEx): string {
+  const name = toTitleCase(item.name);
+  const type = formatItemType(item);
+  const weight = formatItemWeight(item);
+  const value = formatItemValue(item);
+  const rarity = item.rarity === 'none' ? undefined : toTitleCase(item.rarity);
+  const damage = formatItemDamage(item);
+  const ac = formatItemArmorClass(item);
+  const requirements = formatItemRequirements(item);
+  const properties = formatItemProperties(item);
+  const metadata = new YamlDocument({
+    name,
+    type,
+    weight,
+    value,
+    rarity,
+    damage,
+    ac,
+    requirements,
+    properties,
+  });
   return `---
-alias: ${toTitleCase(item.name)}
+alias: ${name}
 tags: 5eTools, item
+${metadata.toString()}
 ---
 
-# ${toTitleCase(item.name)}
+# ${name}
 
 ${buildMarkdownPropertyTable(
-    ['Type', formatItemType(item)],
-    ['Weight', formatItemWeight(item)],
-    ['Value', formatItemValue(item)],
-    ['Rarity', item.rarity === 'none' ? undefined : toTitleCase(item.rarity)],
-    ['Requirements', formatItemRequirements(item)],
-    ['Damage', formatItemDamage(item)],
-    ['AC', formatItemArmorClass(item)],
-    ['Properties', formatItemProperties(item)],
+    ['Type', type],
+    ['Weight', weight],
+    ['Value', value],
+    ['Rarity', rarity],
+    ['Requirements', requirements],
+    ['Damage', damage],
+    ['AC', ac],
+    ['Properties', properties],
   )}
 
 ${formatItemDescription(item)}

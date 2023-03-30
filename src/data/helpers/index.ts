@@ -1,0 +1,1 @@
+export { mapSpellClasses } from './spellClasses';

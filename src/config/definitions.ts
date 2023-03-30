@@ -28,5 +28,6 @@ export interface IConfig {
     senses: string;
     races: string;
     classes: string;
+    datatables: string;
   };
 }

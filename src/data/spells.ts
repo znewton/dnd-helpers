@@ -3,6 +3,7 @@ import {
   CombatTime,
   Entry, FiveEToolsBasePath, getJsonData, IImage,
 } from './common';
+import { mapSpellClasses } from './helpers';
 
 export enum SpellSchool {
   A = 'Abjuration',
@@ -60,6 +61,7 @@ export interface ISpell {
   entriesHigherLevel?: Entry[] | undefined;
   meta?: { ritual: boolean; } | undefined;
   fluff?: ISpellFluff | undefined;
+  classes?: string[];
 }
 type SpellJson = { spell: Omit<ISpell, 'fluff'>[] };
 type SpellFluffJson = { spellFluff: ISpellFluff[] };
@@ -96,12 +98,14 @@ export async function listSpells(
       fluffSpells[fluff.name] = fluff;
     });
   });
+  const spellClassMap = await mapSpellClasses();
   const spells: ISpell[] = [];
   spellJsons.forEach(({ spell }) => {
     spell.forEach((spellDetails) => {
       spells.push({
         ...spellDetails,
         fluff: fluffSpells[spellDetails.name],
+        classes: Array.from(spellClassMap[spellDetails.name.toLowerCase()] ?? []),
       });
     });
   });

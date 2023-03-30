@@ -3,7 +3,7 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { listBooks } from './data';
 import {
-  generateActionsFiles, generateConditionsFiles, generateCreaturesFiles, generateDiseasesFiles, generateRacesFiles, generateSensesFiles, generateSkillsFiles, generateSpellsFiles,
+  generateActionsFiles, generateConditionsFiles, generateCreaturesFiles, generateDataTableFiles, generateDiseasesFiles, generateRacesFiles, generateSensesFiles, generateSkillsFiles, generateSpellsFiles,
 } from './generators';
 import { itemMarkdownToCard } from './misc';
 import { toTitleCase } from './utils';
@@ -18,6 +18,7 @@ const generators: Record<string, () => Promise<void>> = {
   races: generateRacesFiles,
   senses: generateSensesFiles,
   skills: generateSkillsFiles,
+  datatables: generateDataTableFiles,
 };
 
 yargs(hideBin(process.argv))
