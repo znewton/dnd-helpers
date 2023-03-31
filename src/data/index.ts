@@ -37,7 +37,7 @@ export {
   listCreatures,
 } from './creatures';
 export {
-  IItemEx,
+  IItem,
   ItemDamageTypeAbbrev,
   ItemTypeAbbrev,
   ItemPropertyAbbrev,

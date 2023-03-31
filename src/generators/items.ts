@@ -3,26 +3,30 @@ import { promises as fs } from 'fs';
 import { Document as YamlDocument } from 'yaml';
 import config from '../config';
 import {
-  IItemEx, ItemDamageTypeAbbrev, ItemPropertyAbbrev, ItemTypeAbbrev, listItems,
+  IItem, ItemDamageTypeAbbrev, ItemPropertyAbbrev, ItemTypeAbbrev, listItems,
 } from '../data';
 import {
   buildMarkdownPropertyTable,
   entriesToMarkdown, normalizeFilename, toTitleCase,
 } from '../utils';
 
-function formatItemType(item: IItemEx) {
+function formatItemType(item: IItem) {
   if (!item.type) {
     return undefined;
   }
 
+  const footnote = item.typeEntries.length > 0
+    ? `[^t-${ItemTypeAbbrev[item.type]}]`
+    : undefined;
+
   if (item.weapon) {
-    return `${ItemTypeAbbrev[item.type]}, (_${item.weaponCategory}_)`;
+    return `${ItemTypeAbbrev[item.type]}${footnote ?? ''}, (_${item.weaponCategory}_)`;
   }
 
-  return ItemTypeAbbrev[item.type];
+  return `${ItemTypeAbbrev[item.type]}${footnote ?? ''}`;
 }
 
-function formatItemValue(item: IItemEx) {
+function formatItemValue(item: IItem) {
   if (item.value === undefined) {
     const valueByRarity = {
       none: '0-49 gp',
@@ -58,7 +62,7 @@ function formatItemValue(item: IItemEx) {
   return `${item.value} cp`;
 }
 
-function formatItemWeight(item: IItemEx) {
+function formatItemWeight(item: IItem) {
   if (item.weight === undefined) {
     return undefined;
   }
@@ -66,7 +70,7 @@ function formatItemWeight(item: IItemEx) {
   return `${item.weight} lb${isPlural ? 's' : ''}`;
 }
 
-function formatItemDamage(item: IItemEx) {
+function formatItemDamage(item: IItem) {
   if (!(item.dmg1 || item.dmg2 || item.dmgType)) {
     return undefined;
   }
@@ -88,7 +92,7 @@ function formatItemDamage(item: IItemEx) {
   return dmg.join(' ');
 }
 
-function formatItemArmorClass(item: IItemEx) {
+function formatItemArmorClass(item: IItem) {
   if (!item.ac) {
     return undefined;
   }
@@ -104,23 +108,25 @@ function formatItemArmorClass(item: IItemEx) {
   return `${item.ac}`;
 }
 
-function formatItemProperties(item: IItemEx) {
-  // TODO: Links or footnotes? Do these exist in Quickref?
+function formatItemProperties(item: IItem) {
   const props = [];
   if (item.range) {
     props.push(`Range (${item.range} ft.)`);
   }
-  item.property.forEach((property) => {
-    if (property === 'V') {
-      props.unshift(`Versatile (${item.dmg2})`);
+  item.property?.forEach((property) => {
+    const propertyDetails = item.propertyDetails[property];
+    if (propertyDetails) {
+      const footnote = propertyDetails.entries?.length ? `[^p-${property}]` : '';
+      props.push(`${propertyDetails.fullName}${footnote}`);
       return;
     }
+
     props.push(`${ItemPropertyAbbrev[property]}`);
   });
   return props.join(', ');
 }
 
-function formatItemRequirements(item: IItemEx) {
+function formatItemRequirements(item: IItem) {
   const reqs: string[] = [];
 
   if (item.reqAttune === true) {
@@ -139,7 +145,7 @@ function formatItemRequirements(item: IItemEx) {
   return reqs.join(', ');
 }
 
-function formatItemDescription(item: IItemEx): string {
+function formatItemDescription(item: IItem): string {
   const entries = [...(item.entries ?? [])];
   if (item.stealth) {
     entries.push({
@@ -153,7 +159,21 @@ function formatItemDescription(item: IItemEx): string {
   return entriesToMarkdown(entries);
 }
 
-function itemToMarkdown(item: IItemEx): string {
+function formatItemFootnotes(item: IItem): string {
+  const propertyDetails = Object.entries(item.propertyDetails);
+  const typeDetails = item.typeEntries;
+  const footnotes: string[] = [];
+  if (typeDetails.length && item.type) {
+    footnotes.push(`[^t-${item.type}]: ${entriesToMarkdown(typeDetails)}`);
+  }
+  propertyDetails.forEach(([propertyAbbrev, propertyDetail]) => {
+    if (!propertyDetail.entries?.length) return;
+    footnotes.push(`[^p-${propertyAbbrev}]: ${entriesToMarkdown(propertyDetail.entries)}`);
+  });
+  return footnotes.join('\n\n');
+}
+
+function itemToMarkdown(item: IItem): string {
   const name = toTitleCase(item.name);
   const type = formatItemType(item);
   const weight = formatItemWeight(item);
@@ -198,6 +218,8 @@ ${formatItemDescription(item)}
 ---
 
 **Source:** ${item.source}, page ${item.page}
+
+${formatItemFootnotes(item)}
 `;
 }
 

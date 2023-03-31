@@ -3,13 +3,13 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { listBooks } from './data';
 import {
-  generateActionsFiles, generateConditionsFiles, generateCreaturesFiles, generateDataTableFiles, generateDiseasesFiles, generateRacesFiles, generateSensesFiles, generateSkillsFiles, generateSpellsFiles,
+  generateActionsFiles, generateConditionsFiles, generateCreaturesFiles, generateDataTableFiles, generateDiseasesFiles, generateItemsFiles, generateRacesFiles, generateSensesFiles, generateSkillsFiles, generateSpellsFiles,
 } from './generators';
 import { itemMarkdownToCard } from './misc';
 import { toTitleCase } from './utils';
 
 const generators: Record<string, () => Promise<void>> = {
-  items: async () => Promise.reject(new Error('Not implemented')),
+  items: generateItemsFiles,
   creatures: generateCreaturesFiles,
   spells: generateSpellsFiles,
   actions: generateActionsFiles,

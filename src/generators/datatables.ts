@@ -4,7 +4,7 @@ import { PathLike, promises as fs } from 'fs';
 import config from '../config';
 import { toTitleCase } from '../utils';
 import type {
-  ICreature, IItemEx, ISpell,
+  ICreature, IItem, ISpell,
 } from '../data';
 
 interface IDataTableColumn<T> {
@@ -51,7 +51,9 @@ FROM "${sourceDir}"
 ${filterConditions.join('\n')}
 SORT ${[...columns]
     .filter((column) => column.sortPriority >= 0)
-    .sort((a, b) => a.sortPriority - b.sortPriority)} asc
+    .sort((a, b) => a.sortPriority - b.sortPriority)
+    .map((column) => column.name)
+    .join(', ')} asc
 \`\`\`
 `;
 }
@@ -66,7 +68,7 @@ const bestiaryDataTable = buildFilterableDataTable<ICreature>(
   ],
   path.join(config.outputRootDir ?? '/', config.outputDirs.creatures),
 );
-const itemDataTable = buildFilterableDataTable<IItemEx>(
+const itemDataTable = buildFilterableDataTable<IItem>(
   'Items',
   [
     { name: 'name', filterType: 'contains', sortPriority: 0 },

@@ -1,6 +1,7 @@
 export function normalizeFilename(filename: string): string {
   return filename
     .toLowerCase()
+    .replaceAll('+', 'plus')
     .replace(/[ '*()/]/g, '');
 }
 

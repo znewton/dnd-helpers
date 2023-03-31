@@ -194,7 +194,7 @@ export function getOwnedSourceBooks(): string[] {
 }
 
 export function isOwned(
-  object: { source: string; otherSources?: OtherSources },
+  object: { source: string; otherSources?: OtherSources | undefined },
 ) {
   const ownedSourceBooks = getOwnedSourceBooks();
   if (ownedSourceBooks.includes(object.source.toLowerCase())) {
