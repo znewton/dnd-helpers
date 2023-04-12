@@ -1,13 +1,11 @@
 {
-  "extends": "@tsconfig/node18-strictest-esm/tsconfig.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "esModuleInterop": true,
-    "types": [
-      "node"
-    ],
-    "module": "CommonJS",
-    "target": "ESNext",
-    "allowJs": true
-  }
+	"extends": "@tsconfig/node18-strictest-esm/tsconfig.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"esModuleInterop": true,
+		"types": ["node"],
+		"module": "CommonJS",
+		"target": "ESNext",
+		"allowJs": true
+	}
 }

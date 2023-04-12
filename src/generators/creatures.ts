@@ -4,19 +4,19 @@ import { Document as YamlDocument } from 'yaml';
 import config from '../config';
 import { ICreature, listCreatures } from '../data';
 import {
-  build5eMonsterFromJson,
-  entriesToMarkdown,
-  normalizeFilename,
-  toTitleCase,
+	build5eMonsterFromJson,
+	entriesToMarkdown,
+	normalizeFilename,
+	toTitleCase,
 } from '../utils';
 
 function creatureToMarkdown(creature: ICreature): string {
-  const ttrpgStatblock = build5eMonsterFromJson(creature as any);
-  if (creature.environment) {
-    (ttrpgStatblock as any).environment = creature.environment;
-  }
-  const statblockYaml = new YamlDocument({ ...ttrpgStatblock });
-  return `---
+	const ttrpgStatblock = build5eMonsterFromJson(creature as any);
+	if (creature.environment) {
+		(ttrpgStatblock as any).environment = creature.environment;
+	}
+	const statblockYaml = new YamlDocument({ ...ttrpgStatblock });
+	return `---
 alias: ${toTitleCase(creature.name)}
 tags: 5eTools, creature
 statblock: true
@@ -38,15 +38,21 @@ ${creature.fluff?.entries ? entriesToMarkdown(creature.fluff?.entries) : ''}
 }
 
 export async function generateCreaturesFiles() {
-  const outputDir = path.join(config.outputRootDir ?? '/', config.outputDirs.creatures);
-  // Make directory and path to it
-  await fs.mkdir(outputDir, { recursive: true });
-  const creatures = await listCreatures();
-  const fileWritePs: Promise<any>[] = [];
-  creatures.forEach((creature) => {
-    const filePath = path.join(outputDir, `${normalizeFilename(creature.name)}.md`);
-    const fileContents = creatureToMarkdown(creature);
-    fileWritePs.push(fs.writeFile(filePath, fileContents));
-  });
-  await Promise.all(fileWritePs);
+	const outputDir = path.join(
+		config.outputRootDir ?? '/',
+		config.outputDirs.creatures
+	);
+	// Make directory and path to it
+	await fs.mkdir(outputDir, { recursive: true });
+	const creatures = await listCreatures();
+	const fileWritePs: Promise<any>[] = [];
+	creatures.forEach((creature) => {
+		const filePath = path.join(
+			outputDir,
+			`${normalizeFilename(creature.name)}.md`
+		);
+		const fileContents = creatureToMarkdown(creature);
+		fileWritePs.push(fs.writeFile(filePath, fileContents));
+	});
+	await Promise.all(fileWritePs);
 }
