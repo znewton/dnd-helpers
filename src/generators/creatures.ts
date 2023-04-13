@@ -7,6 +7,7 @@ import {
 	build5eMonsterFromJson,
 	entriesToMarkdown,
 	normalizeFilename,
+	obsidianLink,
 	toTitleCase,
 } from '../utils';
 
@@ -15,7 +16,37 @@ function creatureToMarkdown(creature: ICreature): string {
 	if (creature.environment) {
 		(ttrpgStatblock as any).environment = creature.environment;
 	}
-	const statblockYaml = new YamlDocument({ ...ttrpgStatblock });
+	const editedSpells = ttrpgStatblock.spells?.map((spell) => {
+		if (typeof spell !== 'object') {
+			return spell;
+		}
+		const editedSpell: Record<string, string> = {};
+		Object.entries(spell).forEach(([key, value]) => {
+			const spells = value.split(', ');
+			editedSpell[key] = spells
+				.map((spellName) => {
+					const splitName = spellName.split(' (');
+					if (!splitName[0]) {
+						throw new Error(`Unhandled spell name: ${spellName}`);
+					}
+					return `${obsidianLink(splitName[0])}${
+						splitName[1] ? ` (${splitName[1]}` : ''
+					}`;
+				})
+				.join(', ');
+		});
+		return editedSpell;
+	});
+	const statblockYaml = new YamlDocument({
+		...ttrpgStatblock,
+		spells: editedSpells,
+	});
+	const description = [
+		creature.fluff?.entries
+			? entriesToMarkdown(creature.fluff?.entries)
+			: undefined,
+		creature.variant ? entriesToMarkdown(creature.variant) : undefined,
+	].filter((v) => v !== undefined);
 	return `---
 alias: ${toTitleCase(creature.name)}
 tags: 5eTools, creature
@@ -28,9 +59,7 @@ ${statblockYaml.toString()}
 \`\`\`statblock
 creature: ${creature.name}
 \`\`\`
-
-${creature.fluff?.entries ? entriesToMarkdown(creature.fluff?.entries) : ''}
-
+${description ? `\n${description}\n` : ''}
 ---
 
 **Source:** ${creature.source}, page ${creature.page}

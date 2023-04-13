@@ -1,9 +1,11 @@
-/* eslint-disable no-underscore-dangle */
 import {
 	Entry,
+	extendObject,
 	FiveEToolsBasePath,
+	getCopyRefKey,
 	getJsonData,
 	IAbility,
+	ICopySpec,
 	IImage,
 	ISkill,
 } from './common';
@@ -53,7 +55,7 @@ export interface ICreatureFluff {
 	source: string;
 	entries?: Entry[];
 	images?: IImage[];
-	_copy?: Pick<ICreatureFluff, 'name' | 'source'>;
+	_copy?: ICopySpec<ICreatureFluff> | undefined;
 }
 export interface ICreature extends IAbility<number> {
 	name: string;
@@ -77,14 +79,32 @@ export interface ICreature extends IAbility<number> {
 	trait?: Entry[] | undefined;
 	action?: Entry[] | undefined;
 	environment: string[] | undefined;
+	_copy?: ICopySpec<ICreature> | undefined;
 	fluff?: ICreatureFluff | undefined;
+	variant?: Entry[] | undefined;
 }
 
-function getCreatureFluff(
-	creatureName: string,
+function filloutCreatureFluff(
+	fluff: ICreatureFluff | undefined,
 	fluffBestiaryMap: Record<string, ICreatureFluff | undefined>
 ): ICreatureFluff | undefined {
-	return fluffBestiaryMap[creatureName];
+	if (!fluff) {
+		return undefined;
+	}
+	if (fluff._copy !== undefined) {
+		const fluffToCopy = fluffBestiaryMap[getCopyRefKey(fluff._copy)];
+		if (!fluffToCopy) {
+			throw new Error(
+				`Could not copy ${getCopyRefKey(fluff._copy)} for ${fluff.name}`
+			);
+		}
+		return extendObject<ICreatureFluff>(
+			fluff,
+			// For recursive copies
+			filloutCreatureFluff(fluffToCopy, fluffBestiaryMap)
+		);
+	}
+	return fluff;
 }
 
 function filloutCreature(
@@ -94,10 +114,28 @@ function filloutCreature(
 		bestiaryMap: Record<string, ICreature | undefined>;
 	}
 ): ICreature {
-	if ((creature as unknown as any)._copy !== undefined) {
-		console.log('Creature with _copy', creature.name, creature.source);
+	const fluff = filloutCreatureFluff(
+		refs.fluffBestiaryMap[getCopyRefKey(creature)],
+		refs.fluffBestiaryMap
+	);
+	if (creature._copy !== undefined) {
+		const creatureToCopy = refs.bestiaryMap[getCopyRefKey(creature._copy)];
+		if (!creatureToCopy) {
+			throw new Error(
+				`Could not copy ${getCopyRefKey(creature._copy)} for ${
+					creature.name
+				}`
+			);
+		}
+		return {
+			...extendObject<ICreature>(
+				creature,
+				// For recursive copies
+				filloutCreature(creatureToCopy, refs)
+			),
+			fluff,
+		};
 	}
-	const fluff = getCreatureFluff(creature.name, refs.fluffBestiaryMap);
 	return {
 		...creature,
 		fluff,
@@ -139,14 +177,19 @@ export async function listCreatures(
 		});
 	}
 	const bestiaryJsons = await Promise.all(bestiaryReadPs);
+	const bestiaryMap: Record<string, ICreature | undefined> = {};
+	bestiaryJsons.forEach(({ monster }) => {
+		monster.forEach((creature) => {
+			bestiaryMap[getCopyRefKey(creature)] = creature;
+		});
+	});
 	const fluffBestiaryJsons = await Promise.all(fluffBestiaryReadPs);
 	const fluffBestiaryMap: Record<string, ICreatureFluff | undefined> = {};
 	fluffBestiaryJsons.forEach(({ monsterFluff }) => {
 		monsterFluff.forEach((fluff) => {
-			fluffBestiaryMap[fluff.name] = fluff;
+			fluffBestiaryMap[getCopyRefKey(fluff)] = fluff;
 		});
 	});
-	const bestiaryMap: Record<string, ICreature | undefined> = {};
 	const bestiary: ICreature[] = [];
 	bestiaryJsons.forEach(({ monster }) => {
 		monster.forEach((creature) => {

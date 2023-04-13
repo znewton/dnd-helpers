@@ -1,5 +1,4 @@
 import path from 'path';
-import { Document as YamlDocument } from 'yaml';
 import { PathLike, promises as fs } from 'fs';
 import config from '../config';
 import { toTitleCase } from '../utils';
@@ -20,37 +19,20 @@ function buildFilterableDataTable<T>(
 	columns: IDataTableColumn<T>[],
 	sourceDir: PathLike
 ): string {
-	const filters: Record<string, ''> = {};
 	const columnNames: string[] = [];
-	const filterConditions: string[] = [];
-	columns.forEach(({ name, filterType }) => {
-		const nameStr = String(name);
-		filters[nameStr] = '';
-		columnNames.push(nameStr);
-		const frontMatterId = `this.file.frontmatter.filters.${nameStr}`;
-		if (filterType === 'equals') {
-			filterConditions.push(
-				`WHERE ${frontMatterId} = "" OR ${nameStr} = ${frontMatterId}`
-			);
-		} else if (filterType === 'contains') {
-			filterConditions.push(
-				`WHERE icontains(${nameStr}, ${frontMatterId}) OR icontains(${frontMatterId}, ${nameStr})`
-			);
-		}
-	});
-	const filtersYml = new YamlDocument({ filters });
 
 	return `---
 tags: datatable
-${filtersYml.toString()}
+cssclass: fullwidth
 ---
 
 # ${toTitleCase(tableName)}
 
+See [Obsidian Dataview Documentation](https://blacksmithgu.github.io/obsidian-dataview/queries/structure/#filter-sort-group-or-limit-results) for query help.
+
 \`\`\`dataview
 TABLE ${columnNames.join(', ')}
 FROM "${sourceDir}"
-${filterConditions.join('\n')}
 SORT ${[...columns]
 		.filter((column) => column.sortPriority >= 0)
 		.sort((a, b) => a.sortPriority - b.sortPriority)

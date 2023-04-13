@@ -83,15 +83,15 @@ export function reformat5eToolsLinks(text: string) {
 				obsidianLink(p1, p1.toLowerCase())
 			)
 			.replace(
-				/\{@item ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/g,
+				/\{@item ([0-9a-zA-Z ]+)(\|?[a-zA-Z0-9 ']*\|([a-zA-Z0-9 ']+))?\}/g,
 				(_match, p1) => obsidianLink(p1, toTitleCase(p1))
 			)
 			.replace(
-				/\{@creature ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/g,
+				/\{@creature ([0-9a-zA-Z ]+)(\|?[a-zA-Z0-9 ']*\|([a-zA-Z0-9 ']+))?\}/g,
 				(_match, p1) => obsidianLink(p1, toTitleCase(p1))
 			)
 			.replace(
-				/\{@quickref ([0-9a-zA-Z ]+)(\|?\|([a-zA-Z0-9 ']+))?\}/g,
+				/\{@quickref ([0-9a-zA-Z ]+)(\|?[a-zA-Z0-9 ']*\|([a-zA-Z0-9 ']+))?\}/g,
 				(_match, p1) => obsidianLink(p1, toTitleCase(p1))
 			)
 			.replace(/\{@b ([A-Za-z0-9 ]+)\}/g, '**$1**')
@@ -134,6 +134,9 @@ export function buildMarkdownPropertyTable(
 }
 
 function entryToMarkdown(entry: Entry): string | undefined {
+	if (!entry) {
+		return undefined;
+	}
 	if (typeof entry === 'string') {
 		return reformat5eToolsLinks(entry);
 	}
@@ -189,12 +192,18 @@ function entryToMarkdown(entry: Entry): string | undefined {
 	 * Sub Entries
 	 */
 	const isIEntry = (entryToCheck: unknown): entryToCheck is IEntry =>
-		['entries', 'inset', 'inline', 'section'].includes(
-			(entryToCheck as IEntry).type
-		);
+		[
+			'entries',
+			'inset',
+			'inline',
+			'section',
+			'variant',
+			'variantSub',
+			'variantInner',
+		].includes((entryToCheck as IEntry).type);
 	if (isIEntry(entry)) {
 		const markdownEntries: string[] = [];
-		if (entry.name) {
+		if (entry.name && entry.type !== 'variant') {
 			markdownEntries.push(
 				`${!['inset', 'inline'].includes(entry.type) ? '\n\n' : ''}**_${
 					entry.name
@@ -204,6 +213,11 @@ function entryToMarkdown(entry: Entry): string | undefined {
 
 		markdownEntries.push(entriesToMarkdown(entry.entries, ' '));
 
+		if (entry.type === 'variant') {
+			return `\n\n> [!info] **Variant:** ${
+				entry.name ?? ''
+			}\n>${markdownEntries.join('\n').replaceAll('\n', '\n> ')}`;
+		}
 		if (entry.type === 'inset') {
 			return `\n\n> ${markdownEntries
 				.join('\n')
@@ -294,6 +308,51 @@ function entryToMarkdown(entry: Entry): string | undefined {
 			markdownEntries.push(`- ${entryToMarkdown(item)}`);
 		});
 		markdownEntries.push('\n');
+		return markdownEntries.join('\n');
+	}
+
+	/**
+	 * Spellcasting
+	 */
+	if (entry.type === 'spellcasting') {
+		const markdownEntries: string[] = [];
+		if (entry.name) {
+			markdownEntries.push(`**_${entry.name}._**`);
+		}
+		if (entry.headerEntries) {
+			markdownEntries.push(entriesToMarkdown(entry.headerEntries));
+		}
+
+		const spellLevelMap: { [level: string]: string } = {
+			0: 'Cantrips (at will)',
+			1: '1st level',
+			2: '2nd level',
+			3: '3rd level',
+			4: '4th level',
+			5: '5th level',
+			6: '6th level',
+			7: '7th level',
+			8: '8th level',
+			9: '9th level',
+		};
+
+		markdownEntries.push('\n');
+		Object.entries(entry.spells ?? {}).forEach(
+			([level, spellLevelInfo]) => {
+				markdownEntries.push(
+					`- ${spellLevelMap[level]} (${
+						spellLevelInfo.slots
+					} slots): ${spellLevelInfo.spells
+						.map(reformat5eToolsLinks)
+						.join(', ')}`
+				);
+			}
+		);
+		markdownEntries.push('\n');
+
+		if (entry.footerEntries) {
+			markdownEntries.push(entriesToMarkdown(entry.footerEntries));
+		}
 		return markdownEntries.join('\n');
 	}
 

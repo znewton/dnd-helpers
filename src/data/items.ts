@@ -1,6 +1,12 @@
-/* eslint-disable no-underscore-dangle */
 import { entriesToMarkdown, isOwned } from '../utils';
-import { Entry, FiveEToolsBasePath, getJsonData } from './common';
+import {
+	Entry,
+	extendObject,
+	FiveEToolsBasePath,
+	getCopyRefKey,
+	getJsonData,
+	ICopySpec,
+} from './common';
 
 export interface IItemTypeAdditionalEntries {
 	appliesTo: string;
@@ -285,14 +291,7 @@ export interface IItemEx extends IItemBase {
 	seeAlsoVehicle?: string[] | undefined;
 	// Extensions
 	baseItem?: string | undefined;
-	_copy?:
-		| {
-				name: string;
-				source: string;
-				_preserve?: { [key: string]: boolean | undefined };
-				_mod?: any | undefined; // TODO: look for `insertArr`
-		  }
-		| undefined;
+	_copy?: ICopySpec<IItemEx> | undefined;
 	// They are also included in ItemGroups
 }
 
@@ -356,10 +355,35 @@ function replaceItemPropTemplate(item: IItemEx, template: string): string {
 	});
 }
 
+function filloutItem(item: IItemEx, refs: IConversionReferenceData): IItemEx {
+	if (item._copy) {
+		const itemDataToCopy = refs.itemMap[getCopyRefKey(item._copy)];
+		if (!itemDataToCopy) {
+			throw new Error(
+				`Copy Item (${getCopyRefKey(item._copy)}) Not Found for ${
+					item.name
+				}`
+			);
+		}
+		return extendObject<IItemEx>(item, filloutItem(itemDataToCopy, refs));
+	}
+	return item;
+}
+
 function convertItemDataToItem(
-	data: IItemEx,
+	itemEx: IItemEx,
 	refs: IConversionReferenceData
 ): IItem {
+	if ((itemEx as any)._versions) {
+		console.log('_Versions', itemEx.name, itemEx.source);
+	}
+	if ((itemEx as any).variant) {
+		console.log('Variant', itemEx.name, itemEx.source);
+	}
+	if ((itemEx as any)._variants) {
+		console.log('_Variants', itemEx.name, itemEx.source);
+	}
+	const data = filloutItem(itemEx, refs);
 	const item: IItem = {
 		name: data.name,
 		source: data.source,
@@ -441,28 +465,6 @@ function convertItemDataToItem(
 			]
 		);
 	}
-	if (data._copy) {
-		// TODO: HANDLE _mod
-		const itemDataToCopy = refs.itemMap[data._copy.name];
-		if (!itemDataToCopy) {
-			throw new Error(
-				`Copy Item (${data._copy.name}) Not Found for ${data.name}`
-			);
-		}
-		const copiedItem = { ...convertItemDataToItem(itemDataToCopy, refs) };
-		const preservedElements: any = {};
-		Object.entries(data._copy._preserve ?? {}).forEach(
-			([key, preserve]) => {
-				if (!preserve) return;
-				preservedElements[key] = (data as any)[key];
-			}
-		);
-		return {
-			...item,
-			...copiedItem,
-			...preservedElements,
-		};
-	}
 	return item;
 }
 
@@ -516,7 +518,7 @@ export async function listItems(): Promise<IItem[]> {
 	};
 
 	items.forEach((item) => {
-		conversionRefs.itemMap[item.name] = item;
+		conversionRefs.itemMap[getCopyRefKey(item)] = item;
 	});
 	itemsBaseJson.itemProperty.forEach((itemProperty) => {
 		conversionRefs.itemPropertyMap[itemProperty.abbreviation] =
