@@ -8,7 +8,7 @@ const config: IConfig = {
 	outputDirs: {
 		spells: 'Spells',
 		items: 'Items',
-		magicItems: 'MagicItems',
+		magicVariants: 'MagicVariants',
 		creatures: 'Bestiary',
 		conditions: 'Mechanics/Conditions',
 		diseases: 'Mechanics/Diseases',

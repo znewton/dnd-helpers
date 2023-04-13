@@ -37,6 +37,7 @@ export {
 	ItemPropertyAbbrev,
 	ItemRechargeToFull,
 	listItems,
+	listMagicVariants,
 } from './items';
 export { IRace, IRaceFluff, listRaces } from './races';
 export { ISense, listSenses } from './senses';

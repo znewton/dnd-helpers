@@ -2,14 +2,15 @@ import path from 'path';
 import os from 'os';
 import type { IConfig } from './definitions';
 
+const dev = false;
+
 const config: IConfig = {
 	ownedSourceBooks: ['phb', 'mm', 'dmg', 'xge', 'egw', 'tce', 'mpmm', 'erlw'],
 	outputRootDir: path.join(os.homedir(), '/Documents/DND/Source'),
-	// outputRootDir: path.join(__dirname, '../../test'),
 	outputDirs: {
 		spells: 'Spells',
 		items: 'Items',
-		magicItems: 'MagicItems',
+		magicVariants: 'MagicVariants',
 		creatures: 'Bestiary',
 		conditions: 'Mechanics/Conditions',
 		diseases: 'Mechanics/Diseases',
@@ -21,4 +22,7 @@ const config: IConfig = {
 		datatables: '',
 	},
 };
+if (dev) {
+	config.outputRootDir = path.join(__dirname, '../../test');
+}
 export default config;

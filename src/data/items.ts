@@ -1,3 +1,4 @@
+import { evaluate } from 'mathjs';
 import { entriesToMarkdown, isOwned } from '../utils';
 import {
 	Entry,
@@ -315,6 +316,7 @@ export interface IItem
 		| 'weaponCategory'
 		| 'weight'
 		| 'value'
+		| 'tier'
 		| 'rarity'
 		| 'property'
 		| 'reqAttune'
@@ -332,6 +334,7 @@ export interface IItem
 		{ fullName: string; entries?: Entry[] | undefined }
 	>;
 	typeEntries: Entry[];
+	rootItem: IItemEx;
 }
 
 interface IConversionReferenceData {
@@ -374,15 +377,6 @@ function convertItemDataToItem(
 	itemEx: IItemEx,
 	refs: IConversionReferenceData
 ): IItem {
-	if ((itemEx as any)._versions) {
-		console.log('_Versions', itemEx.name, itemEx.source);
-	}
-	if ((itemEx as any).variant) {
-		console.log('Variant', itemEx.name, itemEx.source);
-	}
-	if ((itemEx as any)._variants) {
-		console.log('_Variants', itemEx.name, itemEx.source);
-	}
 	const data = filloutItem(itemEx, refs);
 	const item: IItem = {
 		name: data.name,
@@ -397,6 +391,7 @@ function convertItemDataToItem(
 		weaponCategory: data.weaponCategory,
 		weight: data.weight,
 		value: data.value,
+		tier: data.tier,
 		rarity: data.rarity,
 		property: data.property,
 		reqAttune: data.reqAttune,
@@ -410,6 +405,7 @@ function convertItemDataToItem(
 		entries: [...(data.entries ?? [])],
 		propertyDetails: {},
 		typeEntries: [],
+		rootItem: itemEx,
 	};
 	if (data.hasRefs) {
 		const rawEntries = [...item.entries];
@@ -541,4 +537,106 @@ export async function listItems(): Promise<IItem[]> {
 	return items
 		.map((item) => convertItemDataToItem(item as IItemEx, conversionRefs))
 		.filter((item) => isOwned(item));
+}
+
+export interface IMagicVariant {
+	name: string;
+	type: 'GV'; // "GenericVariant"
+	requires: { [K in keyof IItemEx]: any }[];
+	excludes?: { [K in keyof IItemEx]: any } | undefined;
+	entries?: Entry[] | undefined;
+	inherits: Omit<IItemEx, 'name'> & {
+		namePrefix: string;
+		valueExpression?: string;
+		// Has like "a {=bonusWeapon} bonus to attack"
+		entries: Entry[];
+	};
+}
+
+type MagicVariantsJson = {
+	magicvariant: IMagicVariant[];
+};
+const magicVariantsFilename = 'magicvariants.json';
+const magicVariantsBaseBaseUrl = `${FiveEToolsBasePath}/data`;
+
+export async function listMagicVariants(): Promise<IItem[]> {
+	const magicVariantsJson = await getJsonData<MagicVariantsJson>(
+		magicVariantsFilename,
+		magicVariantsBaseBaseUrl,
+		{
+			magicvariant: [],
+		}
+	);
+
+	magicVariantsJson.magicvariant.forEach((variant: any) => {
+		if (variant.type !== 'GV') {
+			console.error('Unhandled MagicVariant Type', variant.type);
+		}
+	});
+
+	const variantSpecs = magicVariantsJson.magicvariant;
+	const items = await listItems();
+
+	const magicVariants: IItem[] = [];
+
+	variantSpecs.forEach((variant) => {
+		const matchingItems: IItem[] = [];
+		variant.requires.forEach((requires) => {
+			Object.entries(requires).forEach(([key, val]) => {
+				items.forEach((item) => {
+					const meetsReqs = (item.rootItem as any)[key] === val;
+					const isExcluded =
+						variant.excludes === undefined
+							? false
+							: Object.entries(variant.excludes).find(
+									([excKey, excVal]) =>
+										(item.rootItem as any)[excKey] ===
+										excVal
+							  ) !== undefined;
+					if (!isExcluded && meetsReqs) {
+						matchingItems.push(item);
+					}
+				});
+			});
+		});
+		matchingItems.forEach((item) => {
+			const magicVariant: IItem = {
+				...item,
+				name: `${variant.inherits.namePrefix}${item.name}`,
+				source: variant.inherits.source,
+				page: variant.inherits.page,
+				tier: variant.inherits.tier,
+				rarity: variant.inherits.rarity,
+				entries: [
+					...(variant.inherits.entries ?? []).map((entry) =>
+						JSON.parse(
+							JSON.stringify(entry).replace(
+								/\{=([a-zA-Z]+)\}/g,
+								(_match, p1) => (variant as any)[p1] as string
+							)
+						)
+					),
+					...(variant.entries ?? []),
+					...(item.entries ?? []),
+				],
+			};
+			if (variant.inherits.valueExpression) {
+				const valueExpression =
+					variant.inherits.valueExpression.replace(
+						'[[baseItem.value]]',
+						`${item.value ?? 0}`
+					);
+				try {
+					magicVariant.value = evaluate(valueExpression);
+				} catch (e) {
+					console.error(variant.inherits.valueExpression);
+					console.error(valueExpression);
+					console.error(e);
+				}
+			}
+			magicVariants.push(magicVariant);
+		});
+	});
+
+	return magicVariants.filter((item) => isOwned(item));
 }

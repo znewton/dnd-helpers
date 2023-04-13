@@ -83,15 +83,15 @@ export function reformat5eToolsLinks(text: string) {
 				obsidianLink(p1, p1.toLowerCase())
 			)
 			.replace(
-				/\{@item ([0-9a-zA-Z ]+)(\|?[a-zA-Z0-9 ']*\|([a-zA-Z0-9 ']+))?\}/g,
+				/\{@item ([0-9a-zA-Z '()/]+)(\|?[a-zA-Z0-9 '()/]*\|([a-zA-Z0-9 '()/]+))?\}/g,
 				(_match, p1) => obsidianLink(p1, toTitleCase(p1))
 			)
 			.replace(
-				/\{@creature ([0-9a-zA-Z ]+)(\|?[a-zA-Z0-9 ']*\|([a-zA-Z0-9 ']+))?\}/g,
+				/\{@creature ([0-9a-zA-Z '()/]+)(\|?[a-zA-Z0-9 '()/]*\|([a-zA-Z0-9 '()/]+))?\}/g,
 				(_match, p1) => obsidianLink(p1, toTitleCase(p1))
 			)
 			.replace(
-				/\{@quickref ([0-9a-zA-Z ]+)(\|?[a-zA-Z0-9 ']*\|([a-zA-Z0-9 ']+))?\}/g,
+				/\{@quickref ([0-9a-zA-Z '()/]+)(\|?[a-zA-Z0-9 '()/]*\|([a-zA-Z0-9 '()/]+))?\}/g,
 				(_match, p1) => obsidianLink(p1, toTitleCase(p1))
 			)
 			.replace(/\{@b ([A-Za-z0-9 ]+)\}/g, '**$1**')

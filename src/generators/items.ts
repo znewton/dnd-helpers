@@ -9,6 +9,7 @@ import {
 	ItemPropertyAbbrev,
 	ItemTypeAbbrev,
 	listItems,
+	listMagicVariants,
 } from '../data';
 import {
 	buildMarkdownPropertyTable,
@@ -252,6 +253,26 @@ export async function generateItemsFiles() {
 	// Make directory and path to it
 	await fs.mkdir(outputDir, { recursive: true });
 	const items = await listItems();
+	const fileWritePs: Promise<any>[] = [];
+	items.forEach((item) => {
+		const filePath = path.join(
+			outputDir,
+			`${normalizeFilename(item.name)}.md`
+		);
+		const fileContents = itemToMarkdown(item);
+		fileWritePs.push(fs.writeFile(filePath, fileContents));
+	});
+	await Promise.all(fileWritePs);
+}
+
+export async function generateMagicVariantFiles() {
+	const outputDir = path.join(
+		config.outputRootDir ?? '/',
+		config.outputDirs.magicVariants
+	);
+	// Make directory and path to it
+	await fs.mkdir(outputDir, { recursive: true });
+	const items = await listMagicVariants();
 	const fileWritePs: Promise<any>[] = [];
 	items.forEach((item) => {
 		const filePath = path.join(

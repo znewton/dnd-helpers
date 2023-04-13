@@ -2,7 +2,8 @@ export function normalizeFilename(filename: string): string {
 	return filename
 		.toLowerCase()
 		.replaceAll('+', 'plus')
-		.replace(/[ '*()/]/g, '');
+		.replaceAll('*', 'star')
+		.replace(/[ '()/]/g, '');
 }
 
 export function obsidianLink(name: string, displayAs?: string): string {

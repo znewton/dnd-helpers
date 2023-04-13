@@ -19,7 +19,7 @@ export interface IConfig {
 	outputDirs: {
 		spells: string;
 		items: string;
-		magicItems: string;
+		magicVariants: string;
 		creatures: string;
 		conditions: string;
 		diseases: string;

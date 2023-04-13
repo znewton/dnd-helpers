@@ -9,6 +9,7 @@ import {
 	generateDataTableFiles,
 	generateDiseasesFiles,
 	generateItemsFiles,
+	generateMagicVariantFiles,
 	generateRacesFiles,
 	generateSensesFiles,
 	generateSkillsFiles,
@@ -19,6 +20,7 @@ import { toTitleCase } from './utils';
 
 const generators: Record<string, () => Promise<void>> = {
 	items: generateItemsFiles,
+	magicVariants: generateMagicVariantFiles,
 	creatures: generateCreaturesFiles,
 	spells: generateSpellsFiles,
 	actions: generateActionsFiles,
