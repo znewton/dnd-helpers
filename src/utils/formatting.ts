@@ -94,20 +94,22 @@ export function reformat5eToolsLinks(text: string) {
 				/\{@quickref ([0-9a-zA-Z '()/]+)(\|?[a-zA-Z0-9 '()/]*\|([a-zA-Z0-9 '()/]+))?\}/g,
 				(_match, p1) => obsidianLink(p1, toTitleCase(p1))
 			)
-			.replace(/\{@b ([A-Za-z0-9 ]+)\}/g, '**$1**')
-			.replace(/\{@i ([A-Za-z0-9 ]+)\}/g, '_$1_')
+			.replace(/\{@b ([A-Za-z0-9 '()/]+)\}/g, '**$1**')
+			.replace(/\{@bold ([A-Za-z0-9 '()/]+)\}/g, '**$1**')
+			.replace(/\{@i ([A-Za-z0-9 '()/]+)\}/g, '_$1_')
+			.replace(/\{@italic ([A-Za-z0-9 '()/]+)\}/g, '_$1_')
 			.replace(/\{@atk ms\}/g, '_Melee Spell Attack_')
 			.replace(/\{@atk rs\}/g, '_Ranged Spell Attack_')
 			.replace(/\{@atk mw\}/g, '_Melee Weapon Attack_')
 			.replace(/\{@atk rw\}/g, '_Ranged Weapon Attack_')
 			.replace(/\{@atk mw,rw\}/g, '_Melee / Ranged Weapon Attack_')
-			.replace(/\{@action ([A-Za-z0-9 ]+)\}/g, (_match, p1) =>
+			.replace(/\{@action ([A-Za-z0-9 '()/]+)\}/g, (_match, p1) =>
 				obsidianLink(p1)
 			)
 			.replace(
-				/^\{@note (.+)\}$/g,
-				(_match, p1): string =>
-					`> [!note] Note\n> ${reformat5eToolsLinks(p1)}`
+				/^\{@note (.+)\}(\.?)$/g,
+				(_match, p1, p2): string =>
+					`> [!note] Note\n> ${reformat5eToolsLinks(p1)}${p2 ?? ''}`
 			)
 			.replace(
 				/([A-Z][a-z]+) \(\{@skill ([0-9a-zA-Z ]+)\}\)/g,

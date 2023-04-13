@@ -1,5 +1,5 @@
 import { evaluate } from 'mathjs';
-import { entriesToMarkdown, isOwned } from '../utils';
+import { entriesToMarkdown, isOwned, toTitleCase } from '../utils';
 import {
 	Entry,
 	extendObject,
@@ -546,7 +546,12 @@ export interface IMagicVariant {
 	excludes?: { [K in keyof IItemEx]: any } | undefined;
 	entries?: Entry[] | undefined;
 	inherits: Omit<IItemEx, 'name'> & {
-		namePrefix: string;
+		namePrefix?: string;
+		nameSuffix?: string;
+		nameRemove?: string;
+		weightMult?: number;
+		weightExpression?: string;
+		valueMult?: number;
 		valueExpression?: string;
 		// Has like "a {=bonusWeapon} bonus to attack"
 		entries: Entry[];
@@ -600,9 +605,15 @@ export async function listMagicVariants(): Promise<IItem[]> {
 			});
 		});
 		matchingItems.forEach((item) => {
+			const baseName = `${variant.inherits.namePrefix ?? ''}${item.name}${
+				variant.inherits.nameSuffix ?? ''
+			}`;
+			const name = variant.inherits.nameRemove
+				? baseName.replace(variant.inherits.nameRemove, '')
+				: baseName;
 			const magicVariant: IItem = {
 				...item,
-				name: `${variant.inherits.namePrefix}${item.name}`,
+				name,
 				source: variant.inherits.source,
 				page: variant.inherits.page,
 				tier: variant.inherits.tier,
@@ -611,8 +622,34 @@ export async function listMagicVariants(): Promise<IItem[]> {
 					...(variant.inherits.entries ?? []).map((entry) =>
 						JSON.parse(
 							JSON.stringify(entry).replace(
-								/\{=([a-zA-Z]+)\}/g,
-								(_match, p1) => (variant as any)[p1] as string
+								/\{=([a-zA-Z/]+)\}/g,
+								(_match, p1: string): string => {
+									if (p1.startsWith('baseName')) {
+										if (
+											p1.endsWith('/a') ||
+											p1.endsWith('/at')
+										) {
+											const isVowelStart = [
+												'a',
+												'e',
+												'i',
+												'o',
+												'u',
+											].includes(
+												item.name[0]?.toLowerCase() ??
+													''
+											);
+											const a = isVowelStart ? 'an' : 'a';
+											return p1.endsWith('t')
+												? toTitleCase(a)
+												: a;
+										}
+										return p1.endsWith('/l')
+											? item.name.toLowerCase()
+											: item.name;
+									}
+									return (variant as any)[p1] as string;
+								}
 							)
 						)
 					),
@@ -631,6 +668,20 @@ export async function listMagicVariants(): Promise<IItem[]> {
 				} catch (e) {
 					console.error(variant.inherits.valueExpression);
 					console.error(valueExpression);
+					console.error(e);
+				}
+			}
+			if (variant.inherits.weightExpression) {
+				const weightExpression =
+					variant.inherits.weightExpression.replace(
+						'[[baseItem.weight]]',
+						`${item.weight ?? 0}`
+					);
+				try {
+					magicVariant.weight = evaluate(weightExpression);
+				} catch (e) {
+					console.error(variant.inherits.valueExpression);
+					console.error(weightExpression);
 					console.error(e);
 				}
 			}

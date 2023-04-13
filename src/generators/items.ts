@@ -149,7 +149,7 @@ function formatItemRequirements(item: IItem) {
 	if (item.reqAttune === true) {
 		reqs.push('Attunement');
 	} else if (typeof item.reqAttune === 'string') {
-		reqs.push(`Attunment ${item.reqAttune}`);
+		reqs.push(`Attunement ${item.reqAttune}`);
 	}
 
 	if (item.strength) {
