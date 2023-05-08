@@ -206,14 +206,18 @@ function entryToMarkdown(entry: Entry): string | undefined {
 	if (isIEntry(entry)) {
 		const markdownEntries: string[] = [];
 		if (entry.name && entry.type !== 'variant') {
-			markdownEntries.push(
-				`${!['inset', 'inline'].includes(entry.type) ? '\n\n' : ''}**_${
-					entry.name
-				}._**`
-			);
+			if (entry.type === 'section') {
+				markdownEntries.push(`\n\n## ${entry.name}\n\n`);
+			} else {
+				markdownEntries.push(
+					`${
+						!['inset', 'inline'].includes(entry.type) ? '\n\n' : ''
+					}**_${entry.name}._**`
+				);
+			}
 		}
 
-		markdownEntries.push(entriesToMarkdown(entry.entries, ' '));
+		markdownEntries.push(entriesToMarkdown(entry.entries, '\n'));
 
 		if (entry.type === 'variant') {
 			return `\n\n> [!info] **Variant:** ${
@@ -226,7 +230,7 @@ function entryToMarkdown(entry: Entry): string | undefined {
 				.replaceAll('\n', '\n> ')}`;
 		}
 		if (entry.type === 'inline') {
-			markdownEntries.join(' ').replaceAll('\n', ' ');
+			return markdownEntries.join(' ').replaceAll('\n', ' ');
 		}
 
 		return markdownEntries.join(' ');
@@ -240,7 +244,7 @@ function entryToMarkdown(entry: Entry): string | undefined {
 		markdownEntries.push('> [!quote]');
 		markdownEntries.push(entriesToMarkdown(entry.entries));
 		markdownEntries.push(`— ${entry.by}`);
-		return markdownEntries.join('\n').replaceAll('\n', '\n> ');
+		return `\n\n${markdownEntries.join('\n').replaceAll('\n', '\n> ')}\n`;
 	}
 
 	/**
@@ -249,7 +253,11 @@ function entryToMarkdown(entry: Entry): string | undefined {
 	if (entry.type === 'table') {
 		const markdownEntries: string[] = [];
 
-		markdownEntries.push(`\n## ${entry.caption}\n`);
+		if (entry.caption) {
+			markdownEntries.push(`\n## ${entry.caption}\n`);
+		} else {
+			markdownEntries.push(`\n\n`);
+		}
 		markdownEntries.push(`| ${entry.colLabels.join(' | ')} |`);
 		markdownEntries.push(
 			`| ${entry.colLabels.map(() => '---').join(' | ')} |`

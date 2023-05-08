@@ -222,15 +222,15 @@ export function extendObject<
 	const extendedObj: T = {
 		...obj,
 	};
-	if (obj._copy._preserve || (!obj._copy._preserve && !obj._copy._mod)) {
-		Object.entries(copyFromObj).forEach(([key, value]) => {
-			// Always preserve name and source
-			if (['name', 'source'].includes(key)) return;
-			if (!((obj._copy?._preserve as any) ?? {})[key]) {
-				(extendedObj as any)[key] = value;
-			}
-		});
-	}
+	// if (obj._copy._preserve || (!obj._copy._preserve && !obj._copy._mod)) {
+	Object.entries(copyFromObj).forEach(([key, value]) => {
+		// Always preserve name and source
+		if (['name', 'source'].includes(key)) return;
+		if (value && !((obj._copy?._preserve as any) ?? {})[key]) {
+			(extendedObj as any)[key] = JSON.parse(JSON.stringify(value));
+		}
+	});
+	// }
 	let replaceText: ICopyModReplaceTxt | undefined;
 	if (obj._copy._mod) {
 		Object.entries(obj._copy._mod).forEach(([key, value]) => {
